@@ -2,19 +2,18 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    
-    <!-- Título de la aplicación -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pixel-Hop</title>
-
-    <!-- Ícono para pestaña del navegador (SVG integrado) y enlace a logo.png para accesos directos -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230284c7'/><circle cx='65' cy='40' r='12' fill='%23fff'/><circle cx='68' cy='40' r='5' fill='%23000'/></svg>">
-    <link rel="apple-touch-icon" href="logo.png">
-
-    <!-- Configuración Web App para iOS -->
+    
+    <!-- Configuración para Web App en iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Pixel-Hop">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <!-- Ícono SVG Auto-contenido para Pantalla de Inicio (iOS / Safari) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0f1d'/><rect width='92' height='92' x='4' y='4' rx='18' fill='none' stroke='%2338bdf8' stroke-width='2'/><circle cx='75' cy='30' r='10' fill='%23ffee00'/><rect x='20' y='10' width='14' height='25' fill='%2322c55e'/><rect x='60' y='60' width='14' height='30' fill='%2322c55e'/><circle cx='45' cy='50' r='12' fill='%230284c7'/><circle cx='51' cy='47' r='3.5' fill='%23fff'/><circle cx='52' cy='47' r='1.8' fill='%23000'/><polygon points='54,50 63,53 54,56' fill='%23fbbf24'/><text x='50' y='82' font-family='Arial Black' font-size='8' font-weight='900' fill='%23ffee00' text-anchor='middle'>PIXEL-HOP</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0f1d'/><circle cx='45' cy='50' r='12' fill='%230284c7'/><circle cx='51' cy='47' r='3.5' fill='%23fff'/><circle cx='52' cy='47' r='1.8' fill='%23000'/><polygon points='54,50 63,53 54,56' fill='%23fbbf24'/></svg>">
+    <meta name="theme-color" content="#050811">
 
     <style>
         * { box-sizing: border-box; }
@@ -73,12 +72,12 @@
             align-items: center;
         }
         .game-logo {
-            width: 80px;
-            height: 80px;
+            width: 85px;
+            height: 85px;
             object-fit: contain;
             margin-bottom: 12px;
-            border-radius: 16px;
-            filter: drop-shadow(0 4px 8px rgba(56, 189, 248, 0.5));
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
         }
         .name-title {
             color: #ffee00;
@@ -263,8 +262,8 @@
 
     <div id="name-overlay">
         <div class="name-box">
-            <!-- Logo autoguiado integrado en formato SVG -->
-            <img src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230284c7'/><circle cx='65' cy='40' r='12' fill='%23fff'/><circle cx='68' cy='40' r='5' fill='%23000'/></svg>" alt="Logo de Pixel-Hop" class="game-logo">
+            <!-- Logo idéntico renderizado vectorialmente en directo -->
+            <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0f1d'/><rect width='92' height='92' x='4' y='4' rx='18' fill='none' stroke='%2338bdf8' stroke-width='2'/><circle cx='75' cy='30' r='10' fill='%23ffee00'/><rect x='20' y='10' width='14' height='25' rx='2' fill='%2322c55e'/><rect x='60' y='60' width='14' height='30' rx='2' fill='%2322c55e'/><circle cx='45' cy='50' r='12' fill='%230284c7'/><circle cx='51' cy='47' r='3.5' fill='%23fff'/><circle cx='52' cy='47' r='1.8' fill='%23000'/><polygon points='54,50 63,53 54,56' fill='%23fbbf24'/><text x='50' y='82' font-family='Arial Black' font-size='8' font-weight='900' fill='%23ffee00' text-anchor='middle'>PIXEL-HOP</text></svg>" alt="Logo Pixel-Hop" class="game-logo">
             <div class="name-title">¡Ingresa tu Apodo!</div>
             <input type="text" id="player-name-input" class="name-input" placeholder="Tu Nombre o Nick" maxlength="12" autocomplete="off">
             <button class="start-btn" id="btn-save-name">GUARDAR Y JUGAR</button>
