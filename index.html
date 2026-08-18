@@ -7,9 +7,9 @@
     <!-- Título de la aplicación -->
     <title>Pixel-Hop</title>
 
-    <!-- Ícono para navegadores y dispositivos iOS -->
-    <link rel="icon" type="image/png" href="logo.png">
-    <link rel="apple-touch-icon" href="logo.png">
+    <!-- Ícono SVG embebido en Data URI (No requiere archivo logo.png externo) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230284c7'/><circle cx='65' cy='40' r='12' fill='%23fff'/><circle cx='68' cy='40' r='5' fill='%23000'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%230284c7'/><circle cx='65' cy='40' r='12' fill='%23fff'/><circle cx='68' cy='40' r='5' fill='%23000'/></svg>">
 
     <!-- Configuración Web App para iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -546,11 +546,6 @@
         gameStarted = true;
         velocity = jump;
         playJumpSound();
-
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
-        loop();
     }
 
     function update() {
@@ -624,12 +619,10 @@
 
         let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
         if (isDay) {
-            // Fondo de Día (Se activa al llegar a 10 puntos)
             skyGrad.addColorStop(0, "#38bdf8");
             skyGrad.addColorStop(0.6, "#7dd3fc");
             skyGrad.addColorStop(1, "#bae6fd");
         } else {
-            // Fondo de Noche (Inicial)
             skyGrad.addColorStop(0, "#0a0f1d");
             skyGrad.addColorStop(0.6, "#151b33");
             skyGrad.addColorStop(1, "#281537");
@@ -637,7 +630,6 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Astro (Sol de día, Luna de noche)
         let astroGrad = ctx.createRadialGradient(250, 70, 2, 250, 70, 25);
         if (isDay) {
             astroGrad.addColorStop(0, "#ffffff");
@@ -653,7 +645,6 @@
         ctx.arc(250, 70, 25, 0, Math.PI * 2);
         ctx.fill();
 
-        // Nubes (más visibles de día)
         ctx.fillStyle = isDay ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.05)";
         ctx.beginPath();
         ctx.arc(80, 120, 30, 0, Math.PI * 2);
