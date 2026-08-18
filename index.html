@@ -2,13 +2,14 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pixel-Hop</title>
     
     <!-- Configuración para Web App en iOS / Android -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Pixel-Hop">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
 
     <!-- Enlaces directos de íconos para evitar la letra 'P' predeterminada -->
     <link rel="apple-touch-icon" href="IMG_7552.jpeg?v=2">
@@ -20,15 +21,14 @@
 
     <style>
         * { box-sizing: border-box; }
-        body {
+        html, body {
             margin: 0;
             padding: 0;
-            background-color: #050811;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            width: 100%;
+            height: 100%;
+            height: 100dvh;
             overflow: hidden;
+            background-color: #050811;
             font-family: 'Arial Black', Arial, sans-serif;
             color: #fff;
             user-select: none;
@@ -36,15 +36,16 @@
         }
         #game-container {
             position: relative;
-            width: 320px;
-            height: 480px;
-            border-radius: 12px;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            border: 2px solid #334155;
             touch-action: manipulation;
         }
-        canvas { display: block; }
+        canvas { 
+            display: block; 
+            width: 100%;
+            height: 100%;
+        }
 
         /* --- MODAL PARA PEDIR EL NOMBRE Y MOSTRAR LOGO --- */
         #name-overlay {
@@ -69,6 +70,7 @@
             border-radius: 12px;
             text-align: center;
             width: 100%;
+            max-width: 320px;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
             display: flex;
             flex-direction: column;
@@ -166,6 +168,7 @@
             gap: 4px;
             margin-bottom: 12px;
             width: 100%;
+            max-width: 360px;
             justify-content: center;
         }
         .tab-btn {
@@ -178,6 +181,7 @@
             cursor: pointer;
             font-family: inherit;
             border-radius: 6px;
+            flex: 1;
         }
         .tab-btn.active {
             background: #0284c7;
@@ -187,6 +191,7 @@
         }
         .lb-list {
             width: 100%;
+            max-width: 360px;
             flex-grow: 1;
             overflow-y: auto;
             background: #0f172a;
@@ -222,6 +227,7 @@
             font-family: inherit;
             border-radius: 8px;
             width: 100%;
+            max-width: 360px;
         }
         
         #btn-open-lb {
@@ -260,7 +266,7 @@
 
 <div id="game-container">
     <button id="btn-open-lb">🏆 RANKINGS</button>
-    <canvas id="gameCanvas" width="320" height="480"></canvas>
+    <canvas id="gameCanvas"></canvas>
     <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
     <div id="name-overlay">
@@ -301,6 +307,22 @@
     const btnOpenLb = document.getElementById("btn-open-lb");
     const btnCloseLb = document.getElementById("btn-close-lb");
     const btnPromptChange = document.getElementById("btn-prompt-change");
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function solicitarPantallaCompleta() {
+        const elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen().catch(() => {});
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen().catch(() => {});
+        }
+    }
 
     [nameOverlay, leaderboardOverlay].forEach(el => {
         el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
@@ -485,7 +507,7 @@
 
     let pipes = [];
     let pipeWidth = 50;
-    let pipeGap = 88;
+    let pipeGap = 110;
     let pipeInterval = 90;
     let pipeSpeed = 2.0;
     let frameCount = 0;
@@ -518,6 +540,7 @@
 
         if (e && e.cancelable) e.preventDefault();
         initAudio();
+        solicitarPantallaCompleta();
 
         if (!gameStarted) {
             gameStarted = true;
@@ -544,7 +567,7 @@
     canvas.addEventListener("mousedown", handleInput);
 
     function resetGame() {
-        birdY = 200;
+        birdY = canvas.height / 2;
         velocity = 0;
         pipes = [];
         particles = [];
@@ -638,7 +661,8 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let astroGrad = ctx.createRadialGradient(250, 70, 2, 250, 70, 25);
+        let astroX = canvas.width - 70;
+        let astroGrad = ctx.createRadialGradient(astroX, 70, 2, astroX, 70, 25);
         if (isDay) {
             astroGrad.addColorStop(0, "#ffffff");
             astroGrad.addColorStop(0.4, "#fef08a");
@@ -650,7 +674,7 @@
         }
         ctx.fillStyle = astroGrad;
         ctx.beginPath();
-        ctx.arc(250, 70, 25, 0, Math.PI * 2);
+        ctx.arc(astroX, 70, 25, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = isDay ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.05)";
