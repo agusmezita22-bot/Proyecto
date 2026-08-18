@@ -232,6 +232,12 @@
         .lb-rank { color: #ffee00; font-weight: 900; width: 30px; }
         .lb-name { flex-grow: 1; color: #ffffff; }
         .lb-score { color: #00ff66; font-weight: 900; }
+        .lb-status-msg {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            padding: 20px 0;
+        }
         
         .close-btn {
             margin-top: 12px;
@@ -299,6 +305,9 @@
 </div>
 
 <script>
+    // URL Backend Render
+    const API_URL = "https://pixel-hop-backend.onrender.com";
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -310,13 +319,12 @@
     const btnCloseLb = document.getElementById("btn-close-lb");
     const btnPromptChange = document.getElementById("btn-prompt-change");
 
-    let topOffset = 60; // Offset para evitar la barra de estado superior en celulares
+    let topOffset = 60;
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Calcular dinámicamente si el navegador soporta safe area
         const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
         topOffset = Math.max(55, safeAreaTop + 45);
     }
@@ -349,6 +357,7 @@
     }
 
     function executeSaveName() {
+        playMenuClickSound();
         const val = nameInput.value.trim();
         if (val.length > 0) {
             playerName = val;
@@ -371,6 +380,7 @@
 
     btnPromptChange.addEventListener("click", (e) => {
         e.stopPropagation();
+        playMenuClickSound();
         closeLeaderboard();
         nameInput.value = playerName;
         nameOverlay.style.display = "flex";
@@ -378,15 +388,23 @@
 
     btnOpenLb.addEventListener("click", (e) => {
         e.stopPropagation();
+        playMenuClickSound();
         openLeaderboard();
     });
 
     btnCloseLb.addEventListener("click", (e) => {
         e.stopPropagation();
+        playMenuClickSound();
         closeLeaderboard();
     });
 
+    /* ==========================================
+       SYSTEMA DE AUDIO WEB AUDIO API (SFX + MÚSICA)
+       ========================================== */
     let audioCtx = null;
+    let isMusicPlaying = false;
+    let musicInterval = null;
+
     function initAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -396,49 +414,144 @@
         }
     }
 
-    function playScoreSound() {
+    // Clics de menús y botones
+    function playMenuClickSound() {
+        initAudio();
         if (!audioCtx) return;
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
+            osc.stop(audioCtx.currentTime + 0.05);
         } catch (e) {}
     }
 
+    // Puntaje sumado
+    function playScoreSound() {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.06);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.12);
+        } catch (e) {}
+    }
+
+    // Salto
     function playJumpSound() {
         if (!audioCtx) return;
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.06);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
+            osc.frequency.setValueAtTime(280, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.07);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.07);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.06);
+            osc.stop(audioCtx.currentTime + 0.07);
         } catch (e) {}
     }
 
-    const mockRankings = {
-        sem: [{ name: "JipMaster", score: 24 }, { name: "FlyPro", score: 18 }],
-        mes: [{ name: "RetroKing", score: 58 }, { name: "JipMaster", score: 41 }],
-        prov: [{ name: "RosarioFlyer", score: 65 }, { name: "SantaFe_Gamer", score: 48 }],
-        nac: [{ name: "Arg_Ace", score: 110 }, { name: "Mendoza_Pixel", score: 85 }],
-        int: [{ name: "Global_God", score: 189 }, { name: "Tokyo_Jip", score: 150 }]
-    };
+    // Choque / Game Over
+    function playGameOverSound() {
+        if (!audioCtx) return;
+        try {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.35);
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.35);
+        } catch (e) {}
+    }
 
+    // Música Chiptune en Bucle
+    const melody = [
+        261.63, 329.63, 392.00, 523.25, 392.00, 329.63,
+        293.66, 349.23, 440.00, 587.33, 440.00, 349.23,
+        261.63, 329.63, 392.00, 523.25, 659.25, 523.25,
+        196.00, 246.94, 293.66, 392.00, 293.66, 246.94
+    ];
+    let noteIndex = 0;
+
+    function startBackgroundMusic() {
+        if (isMusicPlaying) return;
+        isMusicPlaying = true;
+        noteIndex = 0;
+
+        musicInterval = setInterval(() => {
+            if (!audioCtx || !isMusicPlaying) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                let freq = melody[noteIndex % melody.length];
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+
+                noteIndex++;
+            } catch (e) {}
+        }, 150);
+    }
+
+    function stopBackgroundMusic() {
+        isMusicPlaying = false;
+        if (musicInterval) {
+            clearInterval(musicInterval);
+            musicInterval = null;
+        }
+    }
+
+    /* ==========================================
+       LÓGICA Y RANKINGS
+       ========================================== */
     let currentTab = "sem";
+
+    async function sendScoreToBackend(newScore) {
+        if (!playerName || newScore <= 0) return;
+
+        try {
+            await fetch(`${API_URL}/api/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: playerName,
+                    score: newScore
+                })
+            });
+        } catch (err) {
+            console.warn("Servidor en reposo o error al enviar puntaje:", err);
+        }
+    }
 
     function updateLocalRecords(newScore) {
         if (!playerName) return;
@@ -448,27 +561,36 @@
 
         if (newScore > currentSem) localStorage.setItem("ph_score_sem", newScore);
         if (newScore > currentMes) localStorage.setItem("ph_score_mes", newScore);
-
-        let bestScore = Math.max(currentSem, newScore);
-
-        ['sem', 'mes', 'prov'].forEach(tab => {
-            let user = mockRankings[tab].find(r => r.name === playerName);
-            if (user) {
-                user.score = Math.max(user.score, bestScore);
-            } else if (bestScore > 0) {
-                mockRankings[tab].push({ name: playerName, score: bestScore });
-            }
-        });
     }
 
-    function renderLeaderboard() {
-        const content = document.getElementById("lb-content");
-        content.innerHTML = "";
-        
-        let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
-        updateLocalRecords(currentSem);
+    async function fetchLeaderboard(tab) {
+        try {
+            const response = await fetch(`${API_URL}/api/leaderboard?tab=${tab}`);
+            if (!response.ok) throw new Error("Error obteniendo datos");
+            return await response.json();
+        } catch (error) {
+            let localSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
+            let list = [];
+            if (localSem > 0 && playerName) {
+                list.push({ name: playerName, score: localSem });
+            }
+            return list;
+        }
+    }
 
-        let list = mockRankings[currentTab] || [];
+    async function renderLeaderboard() {
+        const content = document.getElementById("lb-content");
+        content.innerHTML = `<div class="lb-status-msg">Cargando rankings...</div>`;
+
+        let list = await fetchLeaderboard(currentTab);
+
+        content.innerHTML = "";
+
+        if (!list || list.length === 0) {
+            content.innerHTML = `<div class="lb-status-msg">Sin récords registrados aún.</div>`;
+            return;
+        }
+
         list.sort((a, b) => b.score - a.score);
 
         list.forEach((item, index) => {
@@ -487,6 +609,7 @@
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
+            playMenuClickSound();
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             currentTab = btn.getAttribute("data-tab");
@@ -503,6 +626,9 @@
         leaderboardOverlay.style.display = "none";
     }
 
+    /* ==========================================
+       BUCLE DE JUEGO Y FÍSICAS
+       ========================================== */
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
@@ -554,6 +680,7 @@
             gameStarted = true;
             velocity = jump;
             playJumpSound();
+            startBackgroundMusic();
             return;
         }
 
@@ -586,6 +713,7 @@
         gameStarted = true;
         velocity = jump;
         playJumpSound();
+        startBackgroundMusic();
     }
 
     function update() {
@@ -649,8 +777,13 @@
     }
 
     function triggerGameOver() {
-        gameOver = true;
-        updateLocalRecords(score);
+        if (!gameOver) {
+            gameOver = true;
+            stopBackgroundMusic();
+            playGameOverSound();
+            updateLocalRecords(score);
+            sendScoreToBackend(score);
+        }
     }
 
     function drawBackground() {
@@ -815,7 +948,6 @@
     function drawUI() {
         let scoreColor = scoreFlashTimer > 0 ? "#00ff66" : "#ffee00";
         
-        // Dibujar score con offset seguro para celulares
         drawOutlinedText("SCORE: " + score, 16, topOffset, "900 22px 'Arial Black', sans-serif", scoreColor);
 
         let bestSem = localStorage.getItem("ph_score_sem") || 0;
