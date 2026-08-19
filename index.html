@@ -622,24 +622,24 @@
     }
 
     /* ==========================================
-       BUCLE DE JUEGO Y FÍSICAS ORIGINALES DE FLAPPY BIRD
+       BUCLE DE JUEGO Y FÍSICAS MÁS EXIGENTES
        ========================================== */
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
     let birdHitboxRadius = 10;
     
-    // Físicas ajustadas al comportamiento clásico
-    let gravity = 0.45;
+    // Físicas pesadas y reactivas
+    let gravity = 0.55; 
     let velocity = 0;
-    let jump = -6.2;
+    let jump = -7.0; 
     let wingAngle = 0;
 
     let pipes = [];
     let pipeWidth = 52;
-    let pipeGap = 100; // Gap clásico y ajustado del Flappy Bird
-    let pipeInterval = 85;
-    let pipeSpeed = 2.3;
+    let pipeGap = 88; // Reducido a 88px para máxima dificultad
+    let pipeInterval = 78; // Ligeramente más juntos
+    let pipeSpeed = 2.6; 
     let frameCount = 0;
     let lastPipeTop = null; 
 
@@ -872,7 +872,7 @@
 
         ctx.save();
         ctx.translate(birdX, birdY);
-        let angle = Math.min(Math.max(velocity * 0.12, -0.6), 1.2);
+        let angle = Math.min(Math.max(velocity * 0.14, -0.6), 1.2);
         ctx.rotate(angle);
 
         ctx.save();
