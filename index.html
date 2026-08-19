@@ -399,7 +399,7 @@
     });
 
     /* ==========================================
-       SYSTEMA DE AUDIO WEB AUDIO API (SFX + MÚSICA)
+       SISTEMA DE AUDIO WEB AUDIO API (SFX + MÚSICA)
        ========================================== */
     let audioCtx = null;
     let isMusicPlaying = false;
@@ -641,10 +641,11 @@
 
     let pipes = [];
     let pipeWidth = 50;
-    let pipeGap = 110;
+    let pipeGap = 135; // Aumentado de 110 a 135 para mejorar la jugabilidad
     let pipeInterval = 90;
     let pipeSpeed = 2.0;
     let frameCount = 0;
+    let lastPipeTop = null; // Variable para almacenar la altura del último tubo
 
     let score = 0;
     let scoreFlashTimer = 0;
@@ -709,6 +710,7 @@
         score = 0;
         frameCount = 0;
         wingAngle = 0;
+        lastPipeTop = null; // Resetea el registro del último tubo
         gameOver = false;
         gameStarted = true;
         velocity = jump;
@@ -729,9 +731,24 @@
 
         frameCount++;
         if (frameCount % pipeInterval === 0) {
-            let minHeight = 45;
-            let maxHeight = canvas.height - pipeGap - minHeight - 25;
-            let topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+            let minHeight = 60;
+            let maxHeight = canvas.height - pipeGap - minHeight - 35;
+
+            let topHeight;
+
+            if (lastPipeTop === null) {
+                // Primer tubo de la partida
+                topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
+            } else {
+                // Limita el cambio brusco de altura entre tubos consecutivos
+                let maxDelta = 120;
+                let minTop = Math.max(minHeight, lastPipeTop - maxDelta);
+                let maxTop = Math.min(maxHeight, lastPipeTop + maxDelta);
+
+                topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+            }
+
+            lastPipeTop = topHeight;
 
             pipes.push({
                 x: canvas.width,
