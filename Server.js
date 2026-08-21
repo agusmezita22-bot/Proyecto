@@ -14,12 +14,14 @@ app.use(express.json());
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
+// Inicialización e intento de conexión a PostgreSQL
 const initDb = async () => {
     try {
-        await pool.query(`
+        const client = await pool.connect();
+        await client.query(`
             CREATE TABLE IF NOT EXISTS leaderboard (
                 id SERIAL PRIMARY KEY,
                 player_name VARCHAR(50) NOT NULL,
@@ -27,29 +29,37 @@ const initDb = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log("Tabla lista.");
+        client.release();
+        console.log("Conexión a base de datos exitosa y tabla verificada.");
     } catch (err) {
-        console.error("Error init DB:", err);
+        console.error("Error al conectar con la base de datos PostgreSQL:", err.message);
     }
 };
 initDb();
 
+app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
 app.post('/api/score', async (req, res) => {
     const { playerName, score } = req.body;
 
+    console.log(`Petición recibida - Nombre: ${playerName}, Score: ${score}`);
+
     if (!playerName || score === undefined || score === null) {
-        return res.status(400).json({ error: "Faltan datos" });
+        return res.status(400).json({ error: "Faltan datos obligatorios (playerName o score)" });
     }
 
     try {
-        await pool.query(
-            'INSERT INTO leaderboard (player_name, score) VALUES ($1, $2)',
-            [String(playerName).trim(), parseInt(score, 10)]
-        );
-        res.status(200).json({ status: "ok" });
+        const query = 'INSERT INTO leaderboard (player_name, score) VALUES ($1, $2) RETURNING *';
+        const values = [String(playerName).trim(), parseInt(score, 10)];
+        const result = await pool.query(query, values);
+        
+        console.log("Puntaje guardado exitosamente:", result.rows[0]);
+        res.status(200).json({ status: "ok", data: result.rows[0] });
     } catch (err) {
-        console.error("Error insert:", err);
-        res.status(500).json({ error: "Error interno" });
+        console.error("Error al insertar en la base de datos:", err.message);
+        res.status(500).json({ error: "Error en base de datos", details: err.message });
     }
 });
 
@@ -76,10 +86,10 @@ app.get('/api/leaderboard', async (req, res) => {
         const result = await pool.query(query);
         res.status(200).json(result.rows || []);
     } catch (err) {
-        console.error("Error select:", err);
+        console.error("Error al consultar posiciones:", err.message);
         res.status(200).json([]);
     }
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor listo en ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor escuchando en el puerto ${PORT}`));
