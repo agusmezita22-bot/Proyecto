@@ -6,80 +6,94 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Conexión a la base de datos
+// Conexión a la base de datos de Render
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
 });
 
-// Crear la tabla automáticamente si no existe
+// Crear tabla automáticamente al iniciar el servidor
 const initDb = async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS leaderboard (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(12) NOT NULL,
-        score INT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
-    console.log("Base de datos lista");
-  } catch (err) {
-    console.error("Error al iniciar DB:", err);
-  }
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS leaderboard (
+                id SERIAL PRIMARY KEY,
+                player_name VARCHAR(50) NOT NULL,
+                score INT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+        console.log("Tabla 'leaderboard' verificada / creada con éxito.");
+    } catch (err) {
+        console.error("Error al inicializar la base de datos:", err);
+    }
 };
 initDb();
 
-// 1. Guardar o actualizar puntaje
+// Endpoint para guardar un nuevo puntaje
 app.post('/api/score', async (req, res) => {
-  const { name, score } = req.body;
-  
-  if (!name || typeof score !== 'number') {
-    return res.status(400).json({ error: "Datos inválidos" });
-  }
+    const { playerName, score } = req.body;
 
-  try {
-    const existing = await pool.query('SELECT * FROM leaderboard WHERE name = $1', [name]);
-
-    if (existing.rows.length > 0) {
-      if (score > existing.rows[0].score) {
-        await pool.query('UPDATE leaderboard SET score = $1, created_at = NOW() WHERE name = $2', [score, name]);
-      }
-    } else {
-      await pool.query('INSERT INTO leaderboard (name, score) VALUES ($1, $2)', [name, score]);
+    if (!playerName || score === undefined) {
+        return res.status(400).json({ error: "Faltan datos requeridos (playerName o score)" });
     }
 
-    res.json({ success: true });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error del servidor" });
-  }
+    try {
+        await pool.query(
+            'INSERT INTO leaderboard (player_name, score) VALUES ($1, $2)',
+            [playerName, score]
+        );
+        res.status(200).json({ message: "Puntaje guardado exitosamente" });
+    } catch (err) {
+        console.error("Error al guardar el puntaje:", err);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
 
-// 2. Obtener el Top 50 según la pestaña solicitada
+// Endpoint para obtener los mejores puntajes según la pestaña
 app.get('/api/leaderboard', async (req, res) => {
-  const { tab } = req.query;
-  let timeFilter = "";
+    const { tab } = req.query;
+    let query = 'SELECT DISTINCT ON (player_name) player_name AS name, score FROM leaderboard ORDER BY player_name, score DESC';
 
-  if (tab === 'sem') {
-    timeFilter = "WHERE created_at >= NOW() - INTERVAL '7 days'";
-  } else if (tab === 'mes') {
-    timeFilter = "WHERE created_at >= NOW() - INTERVAL '30 days'";
-  }
+    if (tab === 'sem') {
+        query = `
+            SELECT player_name AS name, MAX(score) AS score 
+            FROM leaderboard 
+            WHERE created_at >= NOW() - INTERVAL '7 days' 
+            GROUP BY player_name 
+            ORDER BY score DESC 
+            LIMIT 10
+        `;
+    } else if (tab === 'mes') {
+        query = `
+            SELECT player_name AS name, MAX(score) AS score 
+            FROM leaderboard 
+            WHERE created_at >= NOW() - INTERVAL '30 days' 
+            GROUP BY player_name 
+            ORDER BY score DESC 
+            LIMIT 10
+        `;
+    } else {
+        // Para Provincia, Nacional e Internacional muestra el ranking histórico global
+        query = `
+            SELECT player_name AS name, MAX(score) AS score 
+            FROM leaderboard 
+            GROUP BY player_name 
+            ORDER BY score DESC 
+            LIMIT 10
+        `;
+    }
 
-  try {
-    const result = await pool.query(`
-      SELECT name, score FROM leaderboard 
-      ${timeFilter} 
-      ORDER BY score DESC 
-      LIMIT 50
-    `);
-    res.json(result.rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al obtener datos" });
-  }
+    try {
+        const result = await pool.query(query);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Error al consultar la tabla de posiciones:", err);
+        res.status(500).json({ error: "Error en la consulta de base de datos" });
+    }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor activo en el puerto ${PORT}`));
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, () => {
+    console.log(`Servidor iniciado en puerto ${PORT}`);
+});
