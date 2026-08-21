@@ -3,16 +3,23 @@ const cors = require('cors');
 const { Pool } = require('pg');
 
 const app = express();
-app.use(cors());
+
+// Configuración amplia de CORS
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
 
-// Conexión a la base de datos de Render
+// Conexión a la base de datos PostgreSQL de Render
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-// Crear tabla automáticamente al iniciar
+// Inicialización automática de la tabla
 const initDb = async () => {
     try {
         await pool.query(`
@@ -23,48 +30,48 @@ const initDb = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `);
-        console.log("Tabla 'leaderboard' lista.");
+        console.log("Tabla 'leaderboard' verificada y lista.");
     } catch (err) {
-        console.error("Error inicializando DB:", err);
+        console.error("Error al verificar la tabla:", err);
     }
 };
 initDb();
 
-// Guardar nuevo puntaje
+// Endpoint para recibir y guardar un puntaje
 app.post('/api/score', async (req, res) => {
     const { playerName, score } = req.body;
 
-    if (!playerName || score === undefined) {
-        return res.status(400).json({ error: "Faltan datos requeridos" });
+    if (!playerName || score === undefined || score === null) {
+        return res.status(400).json({ error: "Faltan datos obligatorios (playerName o score)" });
     }
 
     try {
         await pool.query(
             'INSERT INTO leaderboard (player_name, score) VALUES ($1, $2)',
-            [playerName, Number(score)]
+            [playerName.trim(), parseInt(score, 10)]
         );
-        res.status(200).json({ message: "Guardado exitosamente" });
+        res.status(200).json({ status: "success", message: "Puntaje guardado con éxito" });
     } catch (err) {
-        console.error("Error al guardar:", err);
-        res.status(500).json({ error: "Error interno del servidor" });
+        console.error("Error al insertar puntaje:", err);
+        res.status(500).json({ error: "Error en la base de datos" });
     }
 });
 
-// Obtener mejores puntajes por usuario
+// Endpoint para consultar el ranking
 app.get('/api/leaderboard', async (req, res) => {
     const { tab } = req.query;
-    
-    let timeFilter = "";
+
+    let filter = "";
     if (tab === 'sem') {
-        timeFilter = "WHERE created_at >= NOW() - INTERVAL '7 days'";
+        filter = "WHERE created_at >= NOW() - INTERVAL '7 days'";
     } else if (tab === 'mes') {
-        timeFilter = "WHERE created_at >= NOW() - INTERVAL '30 days'";
+        filter = "WHERE created_at >= NOW() - INTERVAL '30 days'";
     }
 
     const query = `
         SELECT player_name AS name, MAX(score) AS score 
         FROM leaderboard 
-        ${timeFilter}
+        ${filter}
         GROUP BY player_name 
         ORDER BY score DESC 
         LIMIT 10
@@ -72,12 +79,12 @@ app.get('/api/leaderboard', async (req, res) => {
 
     try {
         const result = await pool.query(query);
-        res.json(result.rows);
+        res.status(200).json(result.rows);
     } catch (err) {
-        console.error("Error al consultar ranking:", err);
-        res.status(500).json({ error: "Error en la consulta" });
+        console.error("Error al consultar la lista:", err);
+        res.status(500).json({ error: "Error al consultar la base de datos" });
     }
 });
 
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Servidor iniciado en puerto ${PORT}`));
