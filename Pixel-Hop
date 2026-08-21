@@ -265,6 +265,8 @@
 </div>
 
 <script>
+    const BACKEND_URL = "https://proyecto-y42g.onrender.com";
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
@@ -377,19 +379,11 @@
         } catch (e) {}
     }
 
-    // === RANKINGS ===
-    const mockRankings = {
-        sem: [{ name: "JipMaster", score: 24 }, { name: "FlyPro", score: 18 }],
-        mes: [{ name: "RetroKing", score: 58 }, { name: "JipMaster", score: 41 }],
-        prov: [{ name: "RosarioFlyer", score: 65 }, { name: "SantaFe_Gamer", score: 48 }],
-        nac: [{ name: "Arg_Ace", score: 110 }, { name: "Mendoza_Pixel", score: 85 }],
-        int: [{ name: "Global_God", score: 189 }, { name: "Tokyo_Jip", score: 150 }]
-    };
-
+    // === RANKINGS (CONEXIÓN BACKEND) ===
     let currentTab = "sem";
 
-    function updateLocalRecords(newScore) {
-        if (!playerName) return;
+    async function updateLocalRecords(newScore) {
+        if (!playerName || newScore <= 0) return;
 
         let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
         let currentMes = parseInt(localStorage.getItem("ph_score_mes") || "0");
@@ -397,39 +391,50 @@
         if (newScore > currentSem) localStorage.setItem("ph_score_sem", newScore);
         if (newScore > currentMes) localStorage.setItem("ph_score_mes", newScore);
 
-        let bestScore = Math.max(currentSem, newScore);
-
-        ['sem', 'mes', 'prov'].forEach(tab => {
-            let user = mockRankings[tab].find(r => r.name === playerName);
-            if (user) {
-                user.score = Math.max(user.score, bestScore);
-            } else if (bestScore > 0) {
-                mockRankings[tab].push({ name: playerName, score: bestScore });
-            }
-        });
+        try {
+            await fetch(`${BACKEND_URL}/api/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    playerName: playerName,
+                    score: newScore
+                })
+            });
+        } catch (err) {
+            console.error("Error guardando el puntaje en el servidor:", err);
+        }
     }
 
-    function renderLeaderboard() {
+    async function renderLeaderboard() {
         const content = document.getElementById("lb-content");
-        content.innerHTML = "";
-        
-        let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
-        updateLocalRecords(currentSem);
+        content.innerHTML = "<div style='text-align:center; color:#ffee00; padding:10px;'>Cargando...</div>";
 
-        let list = mockRankings[currentTab] || [];
-        list.sort((a, b) => b.score - a.score);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/leaderboard?tab=${currentTab}`);
+            const list = await response.json();
 
-        list.forEach((item, index) => {
-            const row = document.createElement("div");
-            let isMe = item.name === playerName;
-            row.className = "lb-item" + (isMe ? " is-me" : "");
-            row.innerHTML = `
-                <span class="lb-rank">#${index + 1}</span>
-                <span class="lb-name">${item.name} ${isMe ? "(Tú)" : ""}</span>
-                <span class="lb-score">${item.score} pts</span>
-            `;
-            content.appendChild(row);
-        });
+            content.innerHTML = "";
+
+            if (!Array.isArray(list) || list.length === 0) {
+                content.innerHTML = "<div style='text-align:center; color:#fff; padding:10px;'>Sin registros aún</div>";
+                return;
+            }
+
+            list.forEach((item, index) => {
+                const row = document.createElement("div");
+                let isMe = item.name === playerName;
+                row.className = "lb-item" + (isMe ? " is-me" : "");
+                row.innerHTML = `
+                    <span class="lb-rank">#${index + 1}</span>
+                    <span class="lb-name">${item.name} ${isMe ? "(Tú)" : ""}</span>
+                    <span class="lb-score">${item.score} pts</span>
+                `;
+                content.appendChild(row);
+            });
+        } catch (err) {
+            console.error("Error al obtener los rankings:", err);
+            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error conectando al servidor</div>";
+        }
     }
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
@@ -612,12 +617,10 @@
 
         let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
         if (isDay) {
-            // Fondo de Día
             skyGrad.addColorStop(0, "#38bdf8");
             skyGrad.addColorStop(0.6, "#7dd3fc");
             skyGrad.addColorStop(1, "#bae6fd");
         } else {
-            // Fondo de Noche
             skyGrad.addColorStop(0, "#0a0f1d");
             skyGrad.addColorStop(0.6, "#151b33");
             skyGrad.addColorStop(1, "#281537");
@@ -625,7 +628,6 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Astro (Sol de día, Luna de noche)
         let astroGrad = ctx.createRadialGradient(250, 70, 2, 250, 70, 25);
         if (isDay) {
             astroGrad.addColorStop(0, "#ffffff");
@@ -641,7 +643,6 @@
         ctx.arc(250, 70, 25, 0, Math.PI * 2);
         ctx.fill();
 
-        // Nubes (más visibles de día)
         ctx.fillStyle = isDay ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.05)";
         ctx.beginPath();
         ctx.arc(80, 120, 30, 0, Math.PI * 2);
