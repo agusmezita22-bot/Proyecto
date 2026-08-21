@@ -2,33 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pixel-Hop</title>
-    
-    <!-- Configuración para Web App en iOS / Android -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Pixel-Hop">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-
-    <!-- Íconos -->
-    <link rel="apple-touch-icon" href="IMG_7552.jpeg?v=2">
-    <link rel="apple-touch-icon-precomposed" href="IMG_7552.jpeg?v=2">
-    <link rel="icon" type="image/jpeg" sizes="192x192" href="IMG_7552.jpeg?v=2">
-    <link rel="icon" type="image/jpeg" sizes="32x32" href="IMG_7552.jpeg?v=2">
-    <link rel="shortcut icon" href="IMG_7552.jpeg?v=2">
-    <meta name="theme-color" content="#050811">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Pixel-Hop - Cambio de Día/Noche</title>
     <style>
         * { box-sizing: border-box; }
-        html, body {
+        body {
             margin: 0;
             padding: 0;
-            width: 100%;
-            height: 100%;
-            height: 100dvh;
-            overflow: hidden;
             background-color: #050811;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
             font-family: 'Arial Black', Arial, sans-serif;
             color: #fff;
             user-select: none;
@@ -36,36 +22,17 @@
         }
         #game-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 320px;
+            height: 480px;
+            border-radius: 12px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            border: 2px solid #334155;
             touch-action: manipulation;
         }
-        canvas { 
-            display: block; 
-            width: 100%;
-            height: 100%;
-        }
+        canvas { display: block; }
 
-        /* --- BOTÓN RANKINGS AJUSTADO CON SAFE AREA --- */
-        #btn-open-lb {
-            position: absolute;
-            top: calc(env(safe-area-inset-top, 0px) + 16px);
-            right: 16px;
-            background: #ffee00;
-            color: #000000;
-            border: 2px solid #000000;
-            padding: 7px 14px;
-            font-size: 11px;
-            font-weight: 900;
-            cursor: pointer;
-            z-index: 20;
-            border-radius: 20px;
-            font-family: inherit;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        /* --- MODAL PARA PEDIR EL NOMBRE Y MOSTRAR LOGO --- */
+        /* --- MODAL PARA PEDIR EL NOMBRE --- */
         #name-overlay {
             position: absolute;
             top: 0;
@@ -88,19 +55,7 @@
             border-radius: 12px;
             text-align: center;
             width: 100%;
-            max-width: 320px;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .game-logo {
-            width: 85px;
-            height: 85px;
-            object-fit: cover;
-            margin-bottom: 12px;
-            border-radius: 18px;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.4);
         }
         .name-title {
             color: #ffee00;
@@ -153,7 +108,7 @@
             display: none;
             flex-direction: column;
             align-items: center;
-            padding: calc(env(safe-area-inset-top, 0px) + 15px) 15px 15px 15px;
+            padding: 15px;
             z-index: 50;
         }
         .lb-title {
@@ -186,7 +141,6 @@
             gap: 4px;
             margin-bottom: 12px;
             width: 100%;
-            max-width: 360px;
             justify-content: center;
         }
         .tab-btn {
@@ -199,7 +153,6 @@
             cursor: pointer;
             font-family: inherit;
             border-radius: 6px;
-            flex: 1;
         }
         .tab-btn.active {
             background: #0284c7;
@@ -209,7 +162,6 @@
         }
         .lb-list {
             width: 100%;
-            max-width: 360px;
             flex-grow: 1;
             overflow-y: auto;
             background: #0f172a;
@@ -232,12 +184,6 @@
         .lb-rank { color: #ffee00; font-weight: 900; width: 30px; }
         .lb-name { flex-grow: 1; color: #ffffff; }
         .lb-score { color: #00ff66; font-weight: 900; }
-        .lb-status-msg {
-            text-align: center;
-            color: #94a3b8;
-            font-size: 12px;
-            padding: 20px 0;
-        }
         
         .close-btn {
             margin-top: 12px;
@@ -251,13 +197,28 @@
             font-family: inherit;
             border-radius: 8px;
             width: 100%;
-            max-width: 360px;
+        }
+        
+        #btn-open-lb {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ffee00;
+            color: #000000;
+            border: 2px solid #000000;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 20px;
+            font-family: inherit;
         }
 
         /* --- COPYRIGHT BADGE --- */
         .copyright-tag {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+            bottom: 4px;
             width: 100%;
             text-align: center;
             font-size: 9px;
@@ -274,12 +235,11 @@
 
 <div id="game-container">
     <button id="btn-open-lb">🏆 RANKINGS</button>
-    <canvas id="gameCanvas"></canvas>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
     <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
     <div id="name-overlay">
         <div class="name-box">
-            <img src="IMG_7552.jpeg?v=2" alt="Logo Pixel-Hop" class="game-logo">
             <div class="name-title">¡Ingresa tu Apodo!</div>
             <input type="text" id="player-name-input" class="name-input" placeholder="Tu Nombre o Nick" maxlength="12" autocomplete="off">
             <button class="start-btn" id="btn-save-name">GUARDAR Y JUGAR</button>
@@ -305,8 +265,7 @@
 </div>
 
 <script>
-    // URL Backend Render
-    const API_URL = "https://pixel-hop-backend.onrender.com";
+    const BACKEND_URL = "https://proyecto-y42g.onrender.com";
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -319,32 +278,13 @@
     const btnCloseLb = document.getElementById("btn-close-lb");
     const btnPromptChange = document.getElementById("btn-prompt-change");
 
-    let topOffset = 60;
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-
-        const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
-        topOffset = Math.max(55, safeAreaTop + 45);
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-
-    function solicitarPantallaCompleta() {
-        const elem = document.documentElement;
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(() => {});
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen().catch(() => {});
-        }
-    }
-
+    // Prevenir propagación de eventos
     [nameOverlay, leaderboardOverlay].forEach(el => {
         el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
         el.addEventListener("mousedown", (e) => e.stopPropagation());
     });
 
+    // === GESTIÓN DE JUGADOR ===
     let playerName = localStorage.getItem("ph_player_name") || "";
 
     function checkPlayerName() {
@@ -357,7 +297,6 @@
     }
 
     function executeSaveName() {
-        playMenuClickSound();
         const val = nameInput.value.trim();
         if (val.length > 0) {
             playerName = val;
@@ -380,7 +319,6 @@
 
     btnPromptChange.addEventListener("click", (e) => {
         e.stopPropagation();
-        playMenuClickSound();
         closeLeaderboard();
         nameInput.value = playerName;
         nameOverlay.style.display = "flex";
@@ -388,23 +326,16 @@
 
     btnOpenLb.addEventListener("click", (e) => {
         e.stopPropagation();
-        playMenuClickSound();
         openLeaderboard();
     });
 
     btnCloseLb.addEventListener("click", (e) => {
         e.stopPropagation();
-        playMenuClickSound();
         closeLeaderboard();
     });
 
-    /* ==========================================
-       SISTEMA DE AUDIO WEB AUDIO API (SFX + MÚSICA)
-       ========================================== */
+    // === SONIDOS ===
     let audioCtx = null;
-    let isMusicPlaying = false;
-    let musicInterval = null;
-
     function initAudio() {
         if (!audioCtx) {
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -414,38 +345,20 @@
         }
     }
 
-    function playMenuClickSound() {
-        initAudio();
-        if (!audioCtx) return;
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
-        } catch (e) {}
-    }
-
     function playScoreSound() {
         if (!audioCtx) return;
         try {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            osc.type = 'square';
+            osc.type = 'sine';
             osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-            osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.06);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+            osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.12);
+            osc.stop(audioCtx.currentTime + 0.1);
         } catch (e) {}
     }
 
@@ -455,156 +368,78 @@
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(280, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(650, audioCtx.currentTime + 0.07);
-            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.07);
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.06);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.06);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.07);
+            osc.stop(audioCtx.currentTime + 0.06);
         } catch (e) {}
     }
 
-    function playGameOverSound() {
-        if (!audioCtx) return;
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.35);
-            gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.35);
-        } catch (e) {}
-    }
-
-    const melody = [
-        261.63, 329.63, 392.00, 523.25, 392.00, 329.63,
-        293.66, 349.23, 440.00, 587.33, 440.00, 349.23,
-        261.63, 329.63, 392.00, 523.25, 659.25, 523.25,
-        196.00, 246.94, 293.66, 392.00, 293.66, 246.94
-    ];
-    let noteIndex = 0;
-
-    function startBackgroundMusic() {
-        if (isMusicPlaying) return;
-        isMusicPlaying = true;
-        noteIndex = 0;
-
-        musicInterval = setInterval(() => {
-            if (!audioCtx || !isMusicPlaying) return;
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'square';
-                let freq = melody[noteIndex % melody.length];
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-
-                gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
-
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
-
-                noteIndex++;
-            } catch (e) {}
-        }, 150);
-    }
-
-    function stopBackgroundMusic() {
-        isMusicPlaying = false;
-        if (musicInterval) {
-            clearInterval(musicInterval);
-            musicInterval = null;
-        }
-    }
-
-    /* ==========================================
-       LÓGICA Y RANKINGS
-       ========================================== */
+    // === RANKINGS (CONEXIÓN BACKEND) ===
     let currentTab = "sem";
 
-    async function sendScoreToBackend(newScore) {
+    async function updateLocalRecords(newScore) {
         if (!playerName || newScore <= 0) return;
-
-        try {
-            await fetch(`${API_URL}/api/score`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: playerName,
-                    score: newScore
-                })
-            });
-        } catch (err) {
-            console.warn("Servidor en reposo o error al enviar puntaje:", err);
-        }
-    }
-
-    function updateLocalRecords(newScore) {
-        if (!playerName) return;
 
         let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
         let currentMes = parseInt(localStorage.getItem("ph_score_mes") || "0");
 
         if (newScore > currentSem) localStorage.setItem("ph_score_sem", newScore);
         if (newScore > currentMes) localStorage.setItem("ph_score_mes", newScore);
-    }
 
-    async function fetchLeaderboard(tab) {
         try {
-            const response = await fetch(`${API_URL}/api/leaderboard?tab=${tab}`);
-            if (!response.ok) throw new Error("Error obteniendo datos");
-            return await response.json();
-        } catch (error) {
-            let localSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
-            let list = [];
-            if (localSem > 0 && playerName) {
-                list.push({ name: playerName, score: localSem });
-            }
-            return list;
+            await fetch(`${BACKEND_URL}/api/score`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    playerName: playerName,
+                    score: newScore
+                })
+            });
+        } catch (err) {
+            console.error("Error guardando el puntaje en el servidor:", err);
         }
     }
 
     async function renderLeaderboard() {
         const content = document.getElementById("lb-content");
-        content.innerHTML = `<div class="lb-status-msg">Cargando rankings...</div>`;
+        content.innerHTML = "<div style='text-align:center; color:#ffee00; padding:10px;'>Cargando...</div>";
 
-        let list = await fetchLeaderboard(currentTab);
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/leaderboard?tab=${currentTab}`);
+            const list = await response.json();
 
-        content.innerHTML = "";
+            content.innerHTML = "";
 
-        if (!list || list.length === 0) {
-            content.innerHTML = `<div class="lb-status-msg">Sin récords registrados aún.</div>`;
-            return;
+            if (!Array.isArray(list) || list.length === 0) {
+                content.innerHTML = "<div style='text-align:center; color:#fff; padding:10px;'>Sin registros aún</div>";
+                return;
+            }
+
+            list.forEach((item, index) => {
+                const row = document.createElement("div");
+                let isMe = item.name === playerName;
+                row.className = "lb-item" + (isMe ? " is-me" : "");
+                row.innerHTML = `
+                    <span class="lb-rank">#${index + 1}</span>
+                    <span class="lb-name">${item.name} ${isMe ? "(Tú)" : ""}</span>
+                    <span class="lb-score">${item.score} pts</span>
+                `;
+                content.appendChild(row);
+            });
+        } catch (err) {
+            console.error("Error al obtener los rankings:", err);
+            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error conectando al servidor</div>";
         }
-
-        list.sort((a, b) => b.score - a.score);
-
-        list.forEach((item, index) => {
-            const row = document.createElement("div");
-            let isMe = item.name === playerName;
-            row.className = "lb-item" + (isMe ? " is-me" : "");
-            row.innerHTML = `
-                <span class="lb-rank">#${index + 1}</span>
-                <span class="lb-name">${item.name} ${isMe ? "(Tú)" : ""}</span>
-                <span class="lb-score">${item.score} pts</span>
-            `;
-            content.appendChild(row);
-        });
     }
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
-            playMenuClickSound();
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             btn.classList.add("active");
             currentTab = btn.getAttribute("data-tab");
@@ -621,27 +456,23 @@
         leaderboardOverlay.style.display = "none";
     }
 
-    /* ==========================================
-       BUCLE DE JUEGO Y FÍSICAS MÁS EXIGENTES
-       ========================================== */
+    // === JUEGO Y FÍSICAS ===
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
     let birdHitboxRadius = 10;
     
-    // Físicas pesadas y reactivas
-    let gravity = 0.55; 
+    let gravity = 0.38;
     let velocity = 0;
-    let jump = -7.0; 
+    let jump = -5.6;
     let wingAngle = 0;
 
     let pipes = [];
-    let pipeWidth = 52;
-    let pipeGap = 88; // Reducido a 88px para máxima dificultad
-    let pipeInterval = 78; // Ligeramente más juntos
-    let pipeSpeed = 2.6; 
+    let pipeWidth = 50;
+    let pipeGap = 88;
+    let pipeInterval = 90;
+    let pipeSpeed = 2.0;
     let frameCount = 0;
-    let lastPipeTop = null; 
 
     let score = 0;
     let scoreFlashTimer = 0;
@@ -671,13 +502,11 @@
 
         if (e && e.cancelable) e.preventDefault();
         initAudio();
-        solicitarPantallaCompleta();
 
         if (!gameStarted) {
             gameStarted = true;
             velocity = jump;
             playJumpSound();
-            startBackgroundMusic();
             return;
         }
 
@@ -699,19 +528,22 @@
     canvas.addEventListener("mousedown", handleInput);
 
     function resetGame() {
-        birdY = canvas.height / 2;
+        birdY = 200;
         velocity = 0;
         pipes = [];
         particles = [];
         score = 0;
         frameCount = 0;
         wingAngle = 0;
-        lastPipeTop = null; 
         gameOver = false;
         gameStarted = true;
         velocity = jump;
         playJumpSound();
-        startBackgroundMusic();
+
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+        loop();
     }
 
     function update() {
@@ -727,22 +559,9 @@
 
         frameCount++;
         if (frameCount % pipeInterval === 0) {
-            let minHeight = 50;
-            let maxHeight = canvas.height - pipeGap - minHeight - 30;
-
-            let topHeight;
-
-            if (lastPipeTop === null) {
-                topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
-            } else {
-                let maxDelta = 160; 
-                let minTop = Math.max(minHeight, lastPipeTop - maxDelta);
-                let maxTop = Math.min(maxHeight, lastPipeTop + maxDelta);
-
-                topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
-            }
-
-            lastPipeTop = topHeight;
+            let minHeight = 45;
+            let maxHeight = canvas.height - pipeGap - minHeight - 25;
+            let topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
 
             pipes.push({
                 x: canvas.width,
@@ -788,15 +607,11 @@
     }
 
     function triggerGameOver() {
-        if (!gameOver) {
-            gameOver = true;
-            stopBackgroundMusic();
-            playGameOverSound();
-            updateLocalRecords(score);
-            sendScoreToBackend(score);
-        }
+        gameOver = true;
+        updateLocalRecords(score);
     }
 
+    // === RENDER DÍA / NOCHE ===
     function drawBackground() {
         let isDay = score >= 10;
 
@@ -813,9 +628,7 @@
         ctx.fillStyle = skyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        let astroX = canvas.width - 70;
-        let astroY = topOffset + 30;
-        let astroGrad = ctx.createRadialGradient(astroX, astroY, 2, astroX, astroY, 25);
+        let astroGrad = ctx.createRadialGradient(250, 70, 2, 250, 70, 25);
         if (isDay) {
             astroGrad.addColorStop(0, "#ffffff");
             astroGrad.addColorStop(0.4, "#fef08a");
@@ -827,14 +640,14 @@
         }
         ctx.fillStyle = astroGrad;
         ctx.beginPath();
-        ctx.arc(astroX, astroY, 25, 0, Math.PI * 2);
+        ctx.arc(250, 70, 25, 0, Math.PI * 2);
         ctx.fill();
 
         ctx.fillStyle = isDay ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.05)";
         ctx.beginPath();
-        ctx.arc(80, topOffset + 60, 30, 0, Math.PI * 2);
-        ctx.arc(110, topOffset + 50, 40, 0, Math.PI * 2);
-        ctx.arc(140, topOffset + 60, 30, 0, Math.PI * 2);
+        ctx.arc(80, 120, 30, 0, Math.PI * 2);
+        ctx.arc(110, 110, 40, 0, Math.PI * 2);
+        ctx.arc(140, 120, 30, 0, Math.PI * 2);
         ctx.fill();
     }
 
@@ -872,7 +685,7 @@
 
         ctx.save();
         ctx.translate(birdX, birdY);
-        let angle = Math.min(Math.max(velocity * 0.14, -0.6), 1.2);
+        let angle = Math.min(Math.max(velocity * 0.1, -0.6), 1.2);
         ctx.rotate(angle);
 
         ctx.save();
@@ -958,11 +771,10 @@
 
     function drawUI() {
         let scoreColor = scoreFlashTimer > 0 ? "#00ff66" : "#ffee00";
-        
-        drawOutlinedText("SCORE: " + score, 16, topOffset, "900 22px 'Arial Black', sans-serif", scoreColor);
+        drawOutlinedText("SCORE: " + score, 15, 36, "900 22px 'Arial Black', sans-serif", scoreColor);
 
         let bestSem = localStorage.getItem("ph_score_sem") || 0;
-        drawOutlinedText("MÁX. SEMANAL: " + bestSem, 16, topOffset + 22, "bold 12px 'Arial Black', sans-serif", "#00f0ff", "#000000", 3);
+        drawOutlinedText("MÁX. SEMANAL: " + bestSem, 15, 56, "bold 12px 'Arial Black', sans-serif", "#00f0ff", "#000000", 3);
 
         if (!gameStarted && nameOverlay.style.display !== "flex") {
             ctx.textAlign = "center";
