@@ -32,7 +32,7 @@
         }
         canvas { display: block; }
 
-        /* --- MODAL PARA PEDIR EL NOMBRE --- */
+        /* --- OVERLAY NOMBRE --- */
         #name-overlay {
             position: absolute;
             top: 0;
@@ -96,7 +96,7 @@
             box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4);
         }
 
-        /* --- OVERLAY DE RANKINGS --- */
+        /* --- OVERLAY RANKINGS --- */
         #leaderboard-overlay {
             position: absolute;
             top: 0;
@@ -215,7 +215,6 @@
             font-family: inherit;
         }
 
-        /* --- COPYRIGHT BADGE --- */
         .copyright-tag {
             position: absolute;
             bottom: 4px;
@@ -278,13 +277,11 @@
     const btnCloseLb = document.getElementById("btn-close-lb");
     const btnPromptChange = document.getElementById("btn-prompt-change");
 
-    // Prevenir propagación de eventos
     [nameOverlay, leaderboardOverlay].forEach(el => {
         el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
         el.addEventListener("mousedown", (e) => e.stopPropagation());
     });
 
-    // === GESTIÓN DE JUGADOR ===
     let playerName = localStorage.getItem("ph_player_name") || "";
 
     function checkPlayerName() {
@@ -334,7 +331,6 @@
         closeLeaderboard();
     });
 
-    // === SONIDOS ===
     let audioCtx = null;
     function initAudio() {
         if (!audioCtx) {
@@ -379,7 +375,6 @@
         } catch (e) {}
     }
 
-    // === RANKINGS (CONEXIÓN BACKEND) ===
     let currentTab = "sem";
 
     async function updateLocalRecords(newScore) {
@@ -401,7 +396,7 @@
                 })
             });
         } catch (err) {
-            console.error("Error guardando el puntaje en el servidor:", err);
+            console.error("Error al guardar el puntaje:", err);
         }
     }
 
@@ -432,8 +427,8 @@
                 content.appendChild(row);
             });
         } catch (err) {
-            console.error("Error al obtener los rankings:", err);
-            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error conectando al servidor</div>";
+            console.error("Error al obtener lista:", err);
+            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error al conectar con el servidor</div>";
         }
     }
 
@@ -456,7 +451,6 @@
         leaderboardOverlay.style.display = "none";
     }
 
-    // === JUEGO Y FÍSICAS ===
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
@@ -611,7 +605,6 @@
         updateLocalRecords(score);
     }
 
-    // === RENDER DÍA / NOCHE ===
     function drawBackground() {
         let isDay = score >= 10;
 
