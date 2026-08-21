@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Pixel-Hop - Cambio de Día/Noche</title>
+    <title>Pixel-Hop - Juego y Ranking</title>
     <style>
         * { box-sizing: border-box; }
         body {
@@ -379,10 +379,12 @@
 
     async function updateLocalRecords(newScore) {
         if (newScore <= 0) return;
-        
-        if (!playerName || playerName.trim() === "") {
-            playerName = "Jugador" + Math.floor(Math.random() * 1000);
-            localStorage.setItem("ph_player_name", playerName);
+
+        let activeName = playerName;
+        if (!activeName || activeName.trim() === "") {
+            activeName = "Jugador" + Math.floor(Math.random() * 1000);
+            playerName = activeName;
+            localStorage.setItem("ph_player_name", activeName);
         }
 
         let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
@@ -393,14 +395,14 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    playerName: playerName.trim(),
+                    playerName: activeName.trim(),
                     score: parseInt(newScore, 10)
                 })
             });
             const data = await response.json();
-            console.log("Respuesta servidor:", data);
+            console.log("Respuesta del servidor:", data);
         } catch (err) {
-            console.error("Error al enviar puntaje:", err);
+            console.error("Error al enviar el puntaje:", err);
         }
     }
 
@@ -432,7 +434,7 @@
             });
         } catch (err) {
             console.error("Error al obtener lista:", err);
-            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error al conectar con el servidor</div>";
+            content.innerHTML = "<div style='text-align:center; color:#ff2a5f; padding:10px;'>Error de conexión</div>";
         }
     }
 
