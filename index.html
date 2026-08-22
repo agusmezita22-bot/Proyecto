@@ -5,39 +5,52 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pixel-Hop</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; user-select: none; }
-        body { background: #111; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
-        #game-container { position: relative; width: 360px; height: 640px; background: #0d1117; border-radius: 12px; overflow: hidden; border: 2px solid #30363d; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body { background: #0d1117; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        #game-container { position: relative; width: 360px; height: 640px; background: #70c5ce; border-radius: 12px; overflow: hidden; border: 3px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         canvas { width: 100%; height: 100%; display: block; }
         
-        /* Modal de Leaderboard */
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 17, 23, 0.95); display: flex; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; z-index: 10; }
+        /* Modales e Interfaz */
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 17, 23, 0.92); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; z-index: 10; }
         .hidden { display: none !important; }
-        h2 { color: #f1e05a; font-size: 20px; margin-bottom: 8px; text-transform: uppercase; }
+        h2 { color: #f1e05a; font-size: 22px; margin-bottom: 6px; text-transform: uppercase; text-shadow: 1px 1px 2px #000; }
         .player-info { color: #8b949e; font-size: 13px; margin-bottom: 12px; }
         .player-info span { color: #58a6ff; font-weight: bold; cursor: pointer; text-decoration: underline; }
         
         .tabs { display: flex; gap: 4px; width: 100%; margin-bottom: 10px; }
-        .tab-btn { flex: 1; padding: 6px 0; background: #21262d; border: 1px solid #30363d; color: #8b949e; font-size: 11px; border-radius: 6px; cursor: pointer; text-align: center; }
-        .tab-btn.active { background: #1f6feb; color: #fff; border-color: #388bfd; font-weight: bold; }
+        .tab-btn { flex: 1; padding: 8px 0; background: #21262d; border: 1px solid #30363d; color: #8b949e; font-size: 11px; border-radius: 6px; cursor: pointer; text-align: center; font-weight: bold; }
+        .tab-btn.active { background: #1f6feb; color: #fff; border-color: #388bfd; }
         
-        .records-list { width: 100%; flex: 1; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-        .lb-row { display: flex; justify-content: space-between; padding: 6px 10px; background: #21262d; border-radius: 4px; color: #c9d1d9; font-size: 13px; }
+        .records-list { width: 100%; height: 380px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 10px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 8px 12px; background: #21262d; border-radius: 4px; color: #c9d1d9; font-size: 13px; }
         .lb-row.is-me { border: 1px solid #238636; background: #122216; color: #3fb950; font-weight: bold; }
         
-        .btn-main { width: 100%; padding: 12px; margin-top: 10px; background: #238636; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; }
-        .btn-main:active { background: #2ea043; }
+        .btn { width: 100%; padding: 12px; margin-top: 10px; background: #238636; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; text-align: center; }
+        .btn-sec { background: #30363d; margin-top: 6px; }
+        .btn:active { opacity: 0.8; }
+        
+        #score-display { position: absolute; top: 20px; width: 100%; text-align: center; font-size: 36px; font-weight: bold; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.6); pointer-events: none; z-index: 5; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="score-display">0</div>
     <canvas id="gameCanvas" width="360" height="640"></canvas>
+
+    <!-- PANTALLA DE GAME OVER / INICIO -->
+    <div id="menuModal" class="modal">
+        <h2 id="menuTitle">PIXEL-HOP</h2>
+        <p class="player-info">Jugador: <strong id="lblPlayerName">Agus</strong> [<span onclick="promptChangeName()">Cambiar</span>]</p>
+        <p id="finalScoreText" style="color: white; font-size: 18px; margin-bottom: 15px;" class="hidden">Puntaje: 0</p>
+        <button class="btn" onclick="startGame()">JUGAR</button>
+        <button class="btn btn-sec" onclick="openLeaderboard()">🏆 RANKINGS</button>
+    </div>
 
     <!-- TABLA DE RÉCORDS -->
     <div id="leaderboardModal" class="modal hidden">
         <h2>Tabla de Récords</h2>
-        <div class="player-info">Jugador: <strong id="lblPlayerName">Agus</strong> [<span onclick="promptChangeName()">Cambiar</span>]</div>
+        <div class="player-info">Jugador: <strong id="lblPlayerNameLb">Agus</strong></div>
         
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('sem', this)">Semanal</button>
@@ -51,11 +64,12 @@
             <p style="color: #8b949e; text-align: center; margin-top: 20px;">Cargando...</p>
         </div>
 
-        <button class="btn-main" onclick="closeLeaderboard()">VOLVER AL JUEGO</button>
+        <button class="btn btn-sec" onclick="closeLeaderboard()">VOLVER</button>
     </div>
 </div>
 
 <script>
+// --- CONFIGURACIÓN BACKEND ---
 const API_URL = "https://proyecto-y42g.onrender.com/api";
 const SECRET_KEY = "SuperSecretPixelHopKey2026";
 
@@ -63,9 +77,12 @@ let playerToken = localStorage.getItem("ph_token") || "";
 let playerName = localStorage.getItem("ph_name") || "Agus";
 let activeTab = "sem";
 
-document.getElementById("lblPlayerName").textContent = playerName;
+function updateNameDisplays() {
+    document.getElementById("lblPlayerName").textContent = playerName;
+    document.getElementById("lblPlayerNameLb").textContent = playerName;
+}
+updateNameDisplays();
 
-// 1. REGISTRO / AUTENTICACIÓN
 async function registerPlayer(nick) {
     try {
         const res = await fetch(`${API_URL}/register`, {
@@ -79,7 +96,7 @@ async function registerPlayer(nick) {
             playerName = data.nickname;
             localStorage.setItem("ph_token", playerToken);
             localStorage.setItem("ph_name", playerName);
-            document.getElementById("lblPlayerName").textContent = playerName;
+            updateNameDisplays();
         }
     } catch (e) {
         console.error("Error registrando jugador:", e);
@@ -87,32 +104,27 @@ async function registerPlayer(nick) {
 }
 
 function promptChangeName() {
-    const newName = prompt("Ingresa tu nuevo apodo:", playerName);
+    const newName = prompt("Ingresa tu apodo:", playerName);
     if (newName && newName.trim().length > 0) {
         registerPlayer(newName.trim());
     }
 }
 
-// 2. FIRMA HMAC Y ENVÍO DE SCORE
 async function generateSignature(token, score, duration, pipes) {
     const encoder = new TextEncoder();
     const keyData = encoder.encode(SECRET_KEY);
     const messageData = encoder.encode(`${token}:${score}:${duration}:${pipes}`);
-    
-    const cryptoKey = await crypto.subtle.importKey(
-        'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
-    );
+    const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     const signatureArray = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
     return Array.from(new Uint8Array(signatureArray)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function sendScoreBackend(score) {
+async function sendScoreBackend(score, duration, pipes) {
     if (score <= 0) return;
     if (!playerToken) await registerPlayer(playerName);
 
-    const duration = 10;
-    const pipes = score;
-    const signature = await generateSignature(playerToken, score, duration, pipes);
+    const safeDuration = Math.max(duration, 2);
+    const signature = await generateSignature(playerToken, score, safeDuration, pipes);
 
     try {
         await fetch(`${API_URL}/scores`, {
@@ -121,7 +133,7 @@ async function sendScoreBackend(score) {
             body: JSON.stringify({
                 token: playerToken,
                 score: score,
-                duration: duration,
+                duration: safeDuration,
                 pipesPassed: pipes,
                 signature: signature
             })
@@ -131,7 +143,6 @@ async function sendScoreBackend(score) {
     }
 }
 
-// 3. CONSULTAR TABLA DE POSICIONES
 async function fetchLeaderboard(tab) {
     const container = document.getElementById("recordsList");
     container.innerHTML = `<p style="color: #8b949e; text-align: center; margin-top: 20px;">Cargando...</p>`;
@@ -154,7 +165,7 @@ async function fetchLeaderboard(tab) {
             container.appendChild(row);
         });
     } catch (e) {
-        container.innerHTML = `<p style="color: #f85149; text-align: center; margin-top: 20px;">Error al cargar datos</p>`;
+        container.innerHTML = `<p style="color: #f85149; text-align: center; margin-top: 20px;">Error de conexión</p>`;
     }
 }
 
@@ -174,42 +185,127 @@ function closeLeaderboard() {
     document.getElementById("leaderboardModal").classList.add("hidden");
 }
 
-// INICIALIZACIÓN DE JUEGO Y REGISTRO INICIAL
 if (!playerToken) registerPlayer(playerName);
 
-// Lógica básica de demostración del juego en Canvas
+// --- LÓGICA DEL JUEGO (CANVAS) ---
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
-let currentScore = 0;
 
-function drawGame() {
-    ctx.fillStyle = "#0d1117";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Toca para hacer 1 punto y probar", canvas.width / 2, canvas.height / 2 - 30);
-    ctx.fillText(`Puntaje actual: ${currentScore}`, canvas.width / 2, canvas.height / 2);
-    ctx.fillStyle = "#238636";
-    ctx.fillRect(80, 360, 200, 40);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillText("VER RANKING", canvas.width / 2, 385);
+let bird = { x: 60, y: 300, radius: 12, velocity: 0, gravity: 0.45, jump: -7.5 };
+let pipes = [];
+let score = 0;
+let pipesPassed = 0;
+let gameRunning = false;
+let gameStartTime = 0;
+let frameCount = 0;
+
+function jump() {
+    if (gameRunning) {
+        bird.velocity = bird.jump;
+    }
 }
 
-canvas.addEventListener("click", (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const y = e.clientY - rect.top;
-    
-    if (y > 360 && y < 400) {
-        openLeaderboard();
-    } else {
-        currentScore++;
-        drawGame();
-        sendScoreBackend(currentScore);
-    }
-});
+window.addEventListener("keydown", (e) => { if (e.code === "Space") jump(); });
+canvas.addEventListener("touchstart", (e) => { e.preventDefault(); jump(); });
+canvas.addEventListener("mousedown", jump);
 
-drawGame();
+function startGame() {
+    bird.y = 300;
+    bird.velocity = 0;
+    pipes = [];
+    score = 0;
+    pipesPassed = 0;
+    frameCount = 0;
+    gameStartTime = Date.now();
+    document.getElementById("score-display").textContent = "0";
+    document.getElementById("menuModal").classList.add("hidden");
+    gameRunning = true;
+    requestAnimationFrame(gameLoop);
+}
+
+function gameOver() {
+    gameRunning = false;
+    const duration = (Date.now() - gameStartTime) / 1000;
+    
+    sendScoreBackend(score, duration, pipesPassed);
+
+    document.getElementById("menuTitle").textContent = "GAME OVER";
+    document.getElementById("finalScoreText").textContent = `Puntaje: ${score}`;
+    document.getElementById("finalScoreText").classList.remove("hidden");
+    document.getElementById("menuModal").classList.remove("hidden");
+}
+
+function gameLoop() {
+    if (!gameRunning) return;
+
+    // Actualizar Pájaro
+    bird.velocity += bird.gravity;
+    bird.y += bird.velocity;
+
+    if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
+        gameOver();
+        return;
+    }
+
+    // Generar Tuberías
+    frameCount++;
+    if (frameCount % 100 === 0) {
+        const gap = 130;
+        const minTop = 50;
+        const maxTop = canvas.height - gap - 100;
+        const topHeight = Math.floor(Math.random() * (maxTop - minTop + 1)) + minTop;
+        pipes.push({ x: canvas.width, top: topHeight, bottom: canvas.height - topHeight - gap, passed: false });
+    }
+
+    // Mover y Colisionar Tuberías
+    for (let i = 0; i < pipes.length; i++) {
+        let p = pipes[i];
+        p.x -= 2;
+
+        // Detección de Colisión
+        if (
+            bird.x + bird.radius > p.x && bird.x - bird.radius < p.x + 50 &&
+            (bird.y - bird.radius < p.top || bird.y + bird.radius > canvas.height - p.bottom)
+        ) {
+            gameOver();
+            return;
+        }
+
+        // Sumar Puntos
+        if (!p.passed && p.x + 50 < bird.x) {
+            p.passed = true;
+            score++;
+            pipesPassed++;
+            document.getElementById("score-display").textContent = score;
+        }
+    }
+
+    // Limpiar tuberías fuera de pantalla
+    pipes = pipes.filter(p => p.x > -60);
+
+    // Dibujar Fondo
+    ctx.fillStyle = "#70c5ce";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Dibujar Tuberías
+    ctx.fillStyle = "#2e7d32";
+    pipes.forEach(p => {
+        ctx.fillRect(p.x, 0, 50, p.top);
+        ctx.fillRect(p.x, canvas.height - p.bottom, 50, p.bottom);
+    });
+
+    // Dibujar Pájaro
+    ctx.fillStyle = "#f1c40f";
+    ctx.beginPath();
+    ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+    ctx.fill();
+
+    requestAnimationFrame(gameLoop);
+}
+
+// Dibujar pantalla inicial limpia
+ctx.fillStyle = "#70c5ce";
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 </script>
 </body>
 </html>
