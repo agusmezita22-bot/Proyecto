@@ -305,8 +305,8 @@
 </div>
 
 <script>
-    // URL Backend Render
-    const API_URL = "https://pixel-hop-backend.onrender.com";
+    // URL Backend Render Actualizada
+    const API_URL = "https://proyecto-y42g.onrender.com";
 
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -320,6 +320,9 @@
     const btnPromptChange = document.getElementById("btn-prompt-change");
 
     let topOffset = 60;
+    let cachedSkyGrad = null;
+    let cachedGroundGrad = null;
+    let cachedIsDay = null;
 
     function resizeCanvas() {
         canvas.width = window.innerWidth;
@@ -327,8 +330,14 @@
 
         const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-top')) || 0;
         topOffset = Math.max(55, safeAreaTop + 45);
+        
+        cachedSkyGrad = null;
+        cachedGroundGrad = null;
     }
+    
     window.addEventListener("resize", resizeCanvas);
+    document.addEventListener("fullscreenchange", () => setTimeout(resizeCanvas, 100));
+    document.addEventListener("webkitfullscreenchange", () => setTimeout(resizeCanvas, 100));
     resizeCanvas();
 
     function solicitarPantallaCompleta() {
@@ -527,12 +536,18 @@
     }
 
     /* ==========================================
-       LÓGICA Y RANKINGS (CORREGIDA CON MANEJO DE RED Y RENDER)
+       LÓGICA Y RANKINGS
        ========================================== */
     let currentTab = "sem";
+    let activeScoreController = null;
 
     async function sendScoreToBackend(newScore) {
         if (!playerName || newScore <= 0) return;
+
+        if (activeScoreController) {
+            activeScoreController.abort();
+        }
+        activeScoreController = new AbortController();
 
         try {
             const res = await fetch(`${API_URL}/score`, {
@@ -541,11 +556,16 @@
                 body: JSON.stringify({
                     name: playerName,
                     score: newScore
-                })
+                }),
+                signal: activeScoreController.signal
             });
             if (!res.ok) console.warn("Error guardando puntaje en el backend:", res.status);
         } catch (err) {
-            console.warn("Servidor inaccesible (guardado solo local):", err);
+            if (err.name !== 'AbortError') {
+                console.warn("Servidor inaccesible (guardado solo local):", err);
+            }
+        } finally {
+            activeScoreController = null;
         }
     }
 
@@ -630,7 +650,7 @@
     }
 
     /* ==========================================
-       BUCLE DE JUEGO Y FÍSICAS MÁS EXIGENTES
+       BUCLE DE JUEGO Y FÍSICAS
        ========================================== */
     let birdX = 70;
     let birdY = 200;
@@ -804,20 +824,38 @@
         }
     }
 
+    function updateBackgroundGradients(isDay) {
+        cachedSkyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+        if (isDay) {
+            cachedSkyGrad.addColorStop(0, "#38bdf8");
+            cachedSkyGrad.addColorStop(0.6, "#7dd3fc");
+            cachedSkyGrad.addColorStop(1, "#bae6fd");
+        } else {
+            cachedSkyGrad.addColorStop(0, "#0a0f1d");
+            cachedSkyGrad.addColorStop(0.6, "#151b33");
+            cachedSkyGrad.addColorStop(1, "#281537");
+        }
+
+        cachedGroundGrad = ctx.createLinearGradient(0, canvas.height - 25, 0, canvas.height);
+        if (isDay) {
+            cachedGroundGrad.addColorStop(0, "#16a34a");
+            cachedGroundGrad.addColorStop(1, "#15803d");
+        } else {
+            cachedGroundGrad.addColorStop(0, "#1e293b");
+            cachedGroundGrad.addColorStop(1, "#0f172a");
+        }
+
+        cachedIsDay = isDay;
+    }
+
     function drawBackground() {
         let isDay = score >= 10;
-
-        let skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        if (isDay) {
-            skyGrad.addColorStop(0, "#38bdf8");
-            skyGrad.addColorStop(0.6, "#7dd3fc");
-            skyGrad.addColorStop(1, "#bae6fd");
-        } else {
-            skyGrad.addColorStop(0, "#0a0f1d");
-            skyGrad.addColorStop(0.6, "#151b33");
-            skyGrad.addColorStop(1, "#281537");
+        
+        if (cachedIsDay !== isDay || !cachedSkyGrad) {
+            updateBackgroundGradients(isDay);
         }
-        ctx.fillStyle = skyGrad;
+
+        ctx.fillStyle = cachedSkyGrad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         let astroX = canvas.width - 70;
@@ -936,17 +974,8 @@
 
     function drawGround() {
         let isDay = score >= 10;
-        let groundGrad = ctx.createLinearGradient(0, canvas.height - 25, 0, canvas.height);
-        
-        if (isDay) {
-            groundGrad.addColorStop(0, "#16a34a");
-            groundGrad.addColorStop(1, "#15803d");
-        } else {
-            groundGrad.addColorStop(0, "#1e293b");
-            groundGrad.addColorStop(1, "#0f172a");
-        }
 
-        ctx.fillStyle = groundGrad;
+        ctx.fillStyle = cachedGroundGrad;
         ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
 
         ctx.fillStyle = isDay ? "#fde047" : "#38bdf8";
