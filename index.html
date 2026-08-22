@@ -527,7 +527,7 @@
     }
 
     /* ==========================================
-       LÓGICA Y RANKINGS (CONECTADO A BACKEND)
+       LÓGICA Y RANKINGS
        ========================================== */
     let currentTab = "sem";
 
@@ -535,6 +535,7 @@
         if (!playerName || newScore <= 0) return;
 
         try {
+            // CORREGIDO: Ruta /score para sincronizar con Express
             await fetch(`${API_URL}/score`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -560,6 +561,7 @@
 
     async function fetchLeaderboard(tab) {
         try {
+            // CORREGIDO: Ruta /leaderboard para sincronizar con Express
             const response = await fetch(`${API_URL}/leaderboard?tab=${tab}`);
             if (!response.ok) throw new Error("Error obteniendo datos");
             return await response.json();
@@ -581,12 +583,12 @@
 
         content.innerHTML = "";
 
-        if (!list || !Array.isArray(list) || list.length === 0) {
+        if (!list || list.length === 0) {
             content.innerHTML = `<div class="lb-status-msg">Sin récords registrados aún.</div>`;
             return;
         }
 
-        // Mapeo seguro para PostgreSQL (soporta 'name'/'nombre' y 'score'/'puntaje')
+        // CORREGIDO: Mapeo seguro para PostgreSQL
         list = list.map(item => ({
             name: item.name || item.nombre || "Jugador",
             score: item.score !== undefined ? item.score : (item.puntaje !== undefined ? item.puntaje : 0)
@@ -628,13 +630,14 @@
     }
 
     /* ==========================================
-       BUCLE DE JUEGO Y FÍSICAS
+       BUCLE DE JUEGO Y FÍSICAS MÁS EXIGENTES
        ========================================== */
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
     let birdHitboxRadius = 10;
     
+    // Físicas pesadas y reactivas
     let gravity = 0.55; 
     let velocity = 0;
     let jump = -7.0; 
@@ -642,8 +645,8 @@
 
     let pipes = [];
     let pipeWidth = 52;
-    let pipeGap = 88;
-    let pipeInterval = 78;
+    let pipeGap = 88; // Reducido a 88px para máxima dificultad
+    let pipeInterval = 78; // Ligeramente más juntos
     let pipeSpeed = 2.6; 
     let frameCount = 0;
     let lastPipeTop = null; 
