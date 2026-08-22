@@ -4,6 +4,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Permite peticiones desde GitHub Pages y otros orígenes
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'OPTIONS'],
@@ -14,21 +15,17 @@ app.use(express.json());
 
 let scores = [];
 
-// Ruta raíz de prueba
 app.get('/', (req, res) => {
-    res.send('Servidor activo');
+    res.send('Servidor Pixel-Hop Activo');
 });
 
-// Ruta de leaderboard
+// Endpoint de lectura (responde lo mismo a cualquier pestaña)
 app.get('/leaderboard', (req, res) => {
-    const topScores = scores.map(s => ({
-        name: s.name,
-        score: s.score
-    }));
-    return res.status(200).json(topScores);
+    const sorted = [...scores].sort((a, b) => b.score - a.score);
+    return res.status(200).json(sorted);
 });
 
-// Ruta para guardar puntaje
+// Endpoint para recibir puntajes
 app.post('/score', (req, res) => {
     const { name, score } = req.body;
 
@@ -36,13 +33,13 @@ app.post('/score', (req, res) => {
         return res.status(400).json({ error: 'Datos inválidos' });
     }
 
-    const existingUserIndex = scores.findIndex(
+    const existingIndex = scores.findIndex(
         s => s.name.toLowerCase() === name.toLowerCase()
     );
 
-    if (existingUserIndex !== -1) {
-        if (score > scores[existingUserIndex].score) {
-            scores[existingUserIndex].score = score;
+    if (existingIndex !== -1) {
+        if (score > scores[existingIndex].score) {
+            scores[existingIndex].score = score;
         }
     } else {
         scores.push({ name, score });
@@ -54,5 +51,5 @@ app.post('/score', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
+    console.log(`Servidor escuchando en puerto ${PORT}`);
 });
