@@ -47,7 +47,7 @@
             height: 100%;
         }
 
-        /* --- BOTÓN RANKINGS AJUSTADO CON SAFE AREA --- */
+        /* --- BOTÓN RANKINGS --- */
         #btn-open-lb {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 16px);
@@ -65,7 +65,7 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
         }
 
-        /* --- MODAL PARA PEDIR EL NOMBRE Y MOSTRAR LOGO --- */
+        /* --- MODAL INGRESO DE NOMBRE --- */
         #name-overlay {
             position: absolute;
             top: 0;
@@ -254,7 +254,6 @@
             max-width: 360px;
         }
 
-        /* --- COPYRIGHT BADGE --- */
         .copyright-tag {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
@@ -305,7 +304,7 @@
 </div>
 
 <script>
-    // URL Backend Render Actualizada
+    // Dirección URL del Backend en Render
     const API_URL = "https://proyecto-y42g.onrender.com";
 
     const canvas = document.getElementById("gameCanvas");
@@ -408,7 +407,7 @@
     });
 
     /* ==========================================
-       SISTEMA DE AUDIO WEB AUDIO API (SFX + MÚSICA)
+       AUDIO (EFECTOS DE SONIDO + MÚSICA)
        ========================================== */
     let audioCtx = null;
     let isMusicPlaying = false;
@@ -536,36 +535,24 @@
     }
 
     /* ==========================================
-       LÓGICA Y RANKINGS
+       RANKINGS Y CONEXIÓN CON SERVIDOR
        ========================================== */
     let currentTab = "sem";
-    let activeScoreController = null;
 
     async function sendScoreToBackend(newScore) {
         if (!playerName || newScore <= 0) return;
 
-        if (activeScoreController) {
-            activeScoreController.abort();
-        }
-        activeScoreController = new AbortController();
-
         try {
-            const res = await fetch(`${API_URL}/score`, {
+            await fetch(`${API_URL}/score`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name: playerName,
                     score: newScore
-                }),
-                signal: activeScoreController.signal
+                })
             });
-            if (!res.ok) console.warn("Error guardando puntaje en el backend:", res.status);
         } catch (err) {
-            if (err.name !== 'AbortError') {
-                console.warn("Servidor inaccesible (guardado solo local):", err);
-            }
-        } finally {
-            activeScoreController = null;
+            console.warn("Servidor inaccesible. Guardado en almacenamiento local.", err);
         }
     }
 
@@ -579,46 +566,33 @@
         if (newScore > currentMes) localStorage.setItem("ph_score_mes", newScore);
     }
 
-    async function fetchLeaderboard(tab) {
+    async function fetchLeaderboard() {
         try {
-            const response = await fetch(`${API_URL}/leaderboard?tab=${tab}`);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${API_URL}/leaderboard?tab=${currentTab}`);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            return await response.json();
         } catch (error) {
-            console.error("Error al conectar con la base de datos global:", error);
-            let localSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
-            let list = [];
-            if (localSem > 0 && playerName) {
-                list.push({ name: playerName, score: localSem });
-            }
-            return list;
+            console.error("Error al cargar ranking global:", error);
+            return null;
         }
     }
 
     async function renderLeaderboard() {
         const content = document.getElementById("lb-content");
-        content.innerHTML = `<div class="lb-status-msg">Cargando rankings...</div>`;
+        content.innerHTML = `<div class="lb-status-msg">Cargando rankings de la nube...</div>`;
 
-        let list = await fetchLeaderboard(currentTab);
+        let list = await fetchLeaderboard();
 
         content.innerHTML = "";
 
         if (!list || list.length === 0) {
-            content.innerHTML = `<div class="lb-status-msg">Sin récords registrados aún.</div>`;
+            content.innerHTML = `<div class="lb-status-msg">No hay récords registrados aún en este servidor.</div>`;
             return;
         }
 
-        list = list.map(item => ({
-            name: item.name || item.nombre || "Jugador",
-            score: item.score !== undefined ? item.score : (item.puntaje !== undefined ? item.puntaje : 0)
-        }));
-
-        list.sort((a, b) => b.score - a.score);
-
         list.forEach((item, index) => {
             const row = document.createElement("div");
-            let isMe = item.name === playerName;
+            let isMe = item.name.toLowerCase() === playerName.toLowerCase();
             row.className = "lb-item" + (isMe ? " is-me" : "");
             row.innerHTML = `
                 <span class="lb-rank">#${index + 1}</span>
@@ -650,7 +624,7 @@
     }
 
     /* ==========================================
-       BUCLE DE JUEGO Y FÍSICAS
+       MECÁNICA Y BUCLE DEL JUEGO
        ========================================== */
     let birdX = 70;
     let birdY = 200;
@@ -674,7 +648,6 @@
     let scoreFlashTimer = 0;
     let gameOver = false;
     let gameStarted = false;
-    let animationFrameId = null;
 
     let particles = [];
 
@@ -1029,7 +1002,7 @@
     function loop() {
         update();
         draw();
-        animationFrameId = requestAnimationFrame(loop);
+        requestAnimationFrame(loop);
     }
 
     checkPlayerName();
