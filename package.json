@@ -1,6 +1,7 @@
 {
   "name": "pixel-hop-backend",
   "version": "1.0.0",
+  "description": "Backend para juego Pixel-Hop",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
