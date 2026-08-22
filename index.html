@@ -527,7 +527,7 @@
     }
 
     /* ==========================================
-       LÓGICA Y RANKINGS
+       LÓGICA Y RANKINGS (CORREGIDA CON MANEJO DE RED Y RENDER)
        ========================================== */
     let currentTab = "sem";
 
@@ -535,8 +535,7 @@
         if (!playerName || newScore <= 0) return;
 
         try {
-            // CORREGIDO: Ruta /score para sincronizar con Express
-            await fetch(`${API_URL}/score`, {
+            const res = await fetch(`${API_URL}/score`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -544,8 +543,9 @@
                     score: newScore
                 })
             });
+            if (!res.ok) console.warn("Error guardando puntaje en el backend:", res.status);
         } catch (err) {
-            console.warn("Servidor en reposo o error al enviar puntaje:", err);
+            console.warn("Servidor inaccesible (guardado solo local):", err);
         }
     }
 
@@ -561,11 +561,12 @@
 
     async function fetchLeaderboard(tab) {
         try {
-            // CORREGIDO: Ruta /leaderboard para sincronizar con Express
             const response = await fetch(`${API_URL}/leaderboard?tab=${tab}`);
-            if (!response.ok) throw new Error("Error obteniendo datos");
-            return await response.json();
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            return data;
         } catch (error) {
+            console.error("Error al conectar con la base de datos global:", error);
             let localSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
             let list = [];
             if (localSem > 0 && playerName) {
@@ -588,7 +589,6 @@
             return;
         }
 
-        // CORREGIDO: Mapeo seguro para PostgreSQL
         list = list.map(item => ({
             name: item.name || item.nombre || "Jugador",
             score: item.score !== undefined ? item.score : (item.puntaje !== undefined ? item.puntaje : 0)
@@ -637,7 +637,6 @@
     let birdRadius = 12;
     let birdHitboxRadius = 10;
     
-    // Físicas pesadas y reactivas
     let gravity = 0.55; 
     let velocity = 0;
     let jump = -7.0; 
@@ -645,8 +644,8 @@
 
     let pipes = [];
     let pipeWidth = 52;
-    let pipeGap = 88; // Reducido a 88px para máxima dificultad
-    let pipeInterval = 78; // Ligeramente más juntos
+    let pipeGap = 88; 
+    let pipeInterval = 78; 
     let pipeSpeed = 2.6; 
     let frameCount = 0;
     let lastPipeTop = null; 
