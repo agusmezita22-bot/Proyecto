@@ -52,6 +52,23 @@
             height: 100%;
         }
 
+        /* --- CONTENEDOR DE ANUNCIOS ADSENSE --- */
+        #ads-container {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 320px;
+            height: 50px;
+            z-index: 30;
+            text-align: center;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
         /* --- BOTÓN RANKINGS --- */
         #btn-open-lb {
             position: absolute;
@@ -261,7 +278,7 @@
 
         .copyright-tag {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
             width: 100%;
             text-align: center;
             font-size: 9px;
@@ -279,6 +296,19 @@
 <div id="game-container">
     <button id="btn-open-lb">🏆 RANKINGS</button>
     <canvas id="gameCanvas"></canvas>
+
+    <!-- BLOQUE DE ANUNCIOS ADSENSE -->
+    <div id="ads-container">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             data-ad-client="ca-pub-5123032314263273"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
     <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
     <div id="name-overlay">
@@ -316,6 +346,7 @@
 
     const nameOverlay = document.getElementById("name-overlay");
     const leaderboardOverlay = document.getElementById("leaderboard-overlay");
+    const adsContainer = document.getElementById("ads-container");
     const btnSaveName = document.getElementById("btn-save-name");
     const nameInput = document.getElementById("player-name-input");
     const btnOpenLb = document.getElementById("btn-open-lb");
@@ -352,9 +383,11 @@
         }
     }
 
-    [nameOverlay, leaderboardOverlay].forEach(el => {
-        el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
-        el.addEventListener("mousedown", (e) => e.stopPropagation());
+    [nameOverlay, leaderboardOverlay, adsContainer].forEach(el => {
+        if (el) {
+            el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
+            el.addEventListener("mousedown", (e) => e.stopPropagation());
+        }
     });
 
     let playerName = localStorage.getItem("ph_player_name") || "";
