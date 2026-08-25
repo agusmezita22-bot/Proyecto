@@ -68,6 +68,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            pointer-events: none; /* Permite que los toques pasen al juego */
+        }
+
+        #ads-container ins {
+            pointer-events: auto; /* Permite interactuar directamente con el banner */
         }
 
         /* --- BOTÓN RANKINGS --- */
@@ -361,7 +366,6 @@
 
     const nameOverlay = document.getElementById("name-overlay");
     const leaderboardOverlay = document.getElementById("leaderboard-overlay");
-    const adsContainer = document.getElementById("ads-container");
     const btnSaveName = document.getElementById("btn-save-name");
     const nameInput = document.getElementById("player-name-input");
     const btnOpenLb = document.getElementById("btn-open-lb");
@@ -726,14 +730,14 @@
     });
 
     window.addEventListener("pointerdown", (e) => {
-        if (e.target.closest('#name-overlay') || 
-            e.target.closest('#leaderboard-overlay') || 
+        if (e.target.closest('#name-overlay.active') || 
+            e.target.closest('#leaderboard-overlay.active') || 
             e.target.closest('#btn-open-lb') || 
-            e.target.closest('#ads-container')) {
+            e.target.closest('ins.adsbygoogle')) {
             return;
         }
         handleInput(e);
-    });
+    }, { passive: false });
 
     function resetGame() {
         birdY = canvas.height / 2;
