@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
+const path = require('path'); // <-- AGREGADO
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,8 +38,17 @@ app.use(cors({
 
 app.use(express.json());
 
+// Servir la carpeta raíz como archivos estáticos
+app.use(express.static(path.join(__dirname)));
+
+// Endpoint específico para servir ads.txt de AdSense
+app.get('/ads.txt', (req, res) => {
+    res.sendFile(path.join(__dirname, 'ads.txt'));
+});
+
 app.get('/', (req, res) => {
-    res.send('Servidor Pixel-Hop Activo');
+    // Si tienes un index.html en la raíz, es recomendable enviarlo aquí:
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Endpoint de lectura adaptado a las pestañas (Semanal, Mensual, Global, etc.)
