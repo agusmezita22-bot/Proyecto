@@ -50,6 +50,7 @@
             display: block; 
             width: 100%;
             height: 100%;
+            touch-action: manipulation;
         }
 
         /* --- CONTENEDOR DE ANUNCIOS ADSENSE --- */
@@ -85,6 +86,7 @@
             border-radius: 20px;
             font-family: inherit;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            touch-action: manipulation;
         }
 
         /* --- MODAL INGRESO DE NOMBRE --- */
@@ -102,6 +104,11 @@
             align-items: center;
             padding: 20px;
             z-index: 100;
+            pointer-events: none;
+        }
+        #name-overlay.active {
+            display: flex;
+            pointer-events: auto;
         }
         .name-box {
             background: #0f172a;
@@ -161,6 +168,7 @@
             width: 100%;
             font-family: inherit;
             box-shadow: 0 4px 12px rgba(0, 230, 118, 0.4);
+            touch-action: manipulation;
         }
 
         /* --- OVERLAY DE RANKINGS --- */
@@ -177,6 +185,11 @@
             align-items: center;
             padding: calc(env(safe-area-inset-top, 0px) + 15px) 15px 15px 15px;
             z-index: 50;
+            pointer-events: none;
+        }
+        #leaderboard-overlay.active {
+            display: flex;
+            pointer-events: auto;
         }
         .lb-title {
             color: #ffee00;
@@ -222,6 +235,7 @@
             font-family: inherit;
             border-radius: 6px;
             flex: 1;
+            touch-action: manipulation;
         }
         .tab-btn.active {
             background: #0284c7;
@@ -274,6 +288,7 @@
             border-radius: 8px;
             width: 100%;
             max-width: 360px;
+            touch-action: manipulation;
         }
 
         .copyright-tag {
@@ -378,9 +393,9 @@
 
     function checkPlayerName() {
         if (!playerName || playerName.trim() === "") {
-            nameOverlay.style.display = "flex";
+            nameOverlay.classList.add("active");
         } else {
-            nameOverlay.style.display = "none";
+            nameOverlay.classList.remove("active");
             document.getElementById("current-player-display").innerText = playerName;
         }
     }
@@ -391,6 +406,7 @@
         if (val.length > 0) {
             playerName = val;
             localStorage.setItem("ph_player_name", playerName);
+            nameInput.blur();
             checkPlayerName();
         }
     }
@@ -412,7 +428,7 @@
         playMenuClickSound();
         closeLeaderboard();
         nameInput.value = playerName;
-        nameOverlay.style.display = "flex";
+        nameOverlay.classList.add("active");
     });
 
     btnOpenLb.addEventListener("pointerdown", (e) => {
@@ -631,11 +647,11 @@
 
     function openLeaderboard() {
         renderLeaderboard();
-        leaderboardOverlay.style.display = "flex";
+        leaderboardOverlay.classList.add("active");
     }
 
     function closeLeaderboard() {
-        leaderboardOverlay.style.display = "none";
+        leaderboardOverlay.classList.remove("active");
     }
 
     let birdX = 70;
@@ -677,8 +693,12 @@
     }
 
     function handleInput(e) {
-        if (nameOverlay.style.display === "flex" || leaderboardOverlay.style.display === "flex") {
+        if (nameOverlay.classList.contains("active") || leaderboardOverlay.classList.contains("active")) {
             return;
+        }
+
+        if (document.activeElement && document.activeElement.tagName === "INPUT") {
+            document.activeElement.blur();
         }
 
         initAudio();
@@ -706,7 +726,10 @@
     });
 
     window.addEventListener("pointerdown", (e) => {
-        if (e.target.closest('#name-overlay') || e.target.closest('#leaderboard-overlay') || e.target.closest('#btn-open-lb') || e.target.closest('#ads-container')) {
+        if (e.target.closest('#name-overlay') || 
+            e.target.closest('#leaderboard-overlay') || 
+            e.target.closest('#btn-open-lb') || 
+            e.target.closest('#ads-container')) {
             return;
         }
         handleInput(e);
@@ -987,7 +1010,7 @@
         let bestSem = localStorage.getItem("ph_score_sem") || 0;
         drawOutlinedText("MÁX. SEMANAL: " + bestSem, 16, topOffset + 22, "bold 12px 'Arial Black', sans-serif", "#00f0ff", "#000000", 3);
 
-        if (!gameStarted && nameOverlay.style.display !== "flex") {
+        if (!gameStarted && !nameOverlay.classList.contains("active")) {
             ctx.textAlign = "center";
             drawOutlinedText("TOCA PARA EMPEZAR", canvas.width / 2, canvas.height / 2, "900 18px 'Arial Black', sans-serif", "#ffee00", "#000000", 4);
             ctx.textAlign = "start";
