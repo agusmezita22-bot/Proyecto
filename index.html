@@ -53,26 +53,22 @@
             touch-action: manipulation;
         }
 
-        /* --- CONTENEDOR DE ANUNCIOS ADSENSE --- */
+        /* --- CONTENEDOR DE ANUNCIOS ADSENSE (Corregido) --- */
         #ads-container {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
             left: 50%;
             transform: translateX(-50%);
-            width: 100%;
-            max-width: 320px;
+            width: 320px;
             height: 50px;
             z-index: 30;
-            text-align: center;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            pointer-events: none; /* Permite que los toques pasen al juego */
+            pointer-events: none !important; /* El área transparente deja pasar los toques al canvas */
         }
 
-        #ads-container ins {
-            pointer-events: auto; /* Permite interactuar directamente con el banner */
+        /* Solo permite la interacción si se toca exactamente la inserción o iframe del anuncio */
+        #ads-container ins,
+        #ads-container iframe {
+            pointer-events: auto !important;
         }
 
         /* --- BOTÓN RANKINGS --- */
@@ -729,13 +725,20 @@
         if (e.code === "Space") handleInput(e); 
     });
 
+    /* --- LISTENER CORREGIDO PARA EVITAR BLOQUEOS DE ADSENSE --- */
     window.addEventListener("pointerdown", (e) => {
-        if (e.target.closest('#name-overlay.active') || 
-            e.target.closest('#leaderboard-overlay.active') || 
-            e.target.closest('#btn-open-lb') || 
+        if (document.getElementById('name-overlay').classList.contains('active') || 
+            document.getElementById('leaderboard-overlay').classList.contains('active')) {
+            return;
+        }
+
+        // Si el toque fue en elementos específicos de la interfaz o el banner publicitario real
+        if (e.target.closest('#btn-open-lb') || 
+            e.target.closest('iframe') || 
             e.target.closest('ins.adsbygoogle')) {
             return;
         }
+        
         handleInput(e);
     }, { passive: false });
 
