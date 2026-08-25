@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
-const path = require('path'); // <-- AGREGADO
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -38,17 +38,21 @@ app.use(cors({
 
 app.use(express.json());
 
-// Servir la carpeta raíz como archivos estáticos
-app.use(express.static(path.join(__dirname)));
+// Servir archivos estáticos de la raíz
+app.use(express.static(path.resolve(__dirname)));
 
-// Endpoint específico para servir ads.txt de AdSense
+// Ruta para el archivo ads.txt de AdSense
 app.get('/ads.txt', (req, res) => {
-    res.sendFile(path.join(__dirname, 'ads.txt'));
+    res.sendFile(path.resolve(__dirname, 'ads.txt'), (err) => {
+        if (err) {
+            res.status(404).send('Archivo ads.txt no encontrado en el servidor');
+        }
+    });
 });
 
+// Ruta principal para servir el juego (index.html)
 app.get('/', (req, res) => {
-    // Si tienes un index.html en la raíz, es recomendable enviarlo aquí:
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.resolve(__dirname, 'index.html'));
 });
 
 // Endpoint de lectura adaptado a las pestañas (Semanal, Mensual, Global, etc.)
