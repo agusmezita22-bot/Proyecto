@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Pixel-Hop</title>
     
-    <!-- Google AdSense -->
+    <!-- Google AdSense Script Principal -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5123032314263273"
      crossorigin="anonymous"></script>
 
@@ -67,6 +67,41 @@
             border-radius: 20px;
             font-family: inherit;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- CONTENEDOR DE AD IN-GAME / GAME OVER --- */
+        #ad-gameover-container {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            max-width: 320px;
+            min-height: 100px;
+            z-index: 30;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* --- BANNER INFERIOR FIJO --- */
+        #ad-bottom-banner {
+            position: absolute;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 468px;
+            height: 60px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 8, 17, 0.5);
         }
 
         /* --- MODAL INGRESO DE NOMBRE --- */
@@ -260,7 +295,7 @@
 
         .copyright-tag {
             position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 4px);
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
             width: 100%;
             text-align: center;
             font-size: 9px;
@@ -278,6 +313,25 @@
 <div id="game-container">
     <button id="btn-open-lb">🏆 RANKINGS</button>
     <canvas id="gameCanvas"></canvas>
+    
+    <!-- Contenedor del Anuncio Game Over -->
+    <div id="ad-gameover-container">
+        <ins class="adsbygoogle"
+             style="display:block; width:100%; height:90px;"
+             data-ad-client="ca-pub-5123032314263273"
+             data-ad-slot="auto"
+             data-ad-format="horizontal"
+             data-full-width-responsive="true"></ins>
+    </div>
+
+    <!-- Banner In-Game Inferior -->
+    <div id="ad-bottom-banner">
+        <ins class="adsbygoogle"
+             style="display:inline-block;width:320px;height:50px"
+             data-ad-client="ca-pub-5123032314263273"
+             data-ad-slot="auto"></ins>
+    </div>
+
     <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
     <div id="name-overlay">
@@ -308,7 +362,10 @@
 </div>
 
 <script>
-    // Dirección URL actualizada del Backend en Render
+    // Inicializar bloques de AdSense disponibles
+    (adsbygoogle = window.adsbygoogle || []).push({});
+    (adsbygoogle = window.adsbygoogle || []).push({});
+
     const API_URL = "https://proyecto-y42g.onrender.com";
 
     const canvas = document.getElementById("gameCanvas");
@@ -316,6 +373,7 @@
 
     const nameOverlay = document.getElementById("name-overlay");
     const leaderboardOverlay = document.getElementById("leaderboard-overlay");
+    const adGameOverContainer = document.getElementById("ad-gameover-container");
     const btnSaveName = document.getElementById("btn-save-name");
     const nameInput = document.getElementById("player-name-input");
     const btnOpenLb = document.getElementById("btn-open-lb");
@@ -352,7 +410,7 @@
         }
     }
 
-    [nameOverlay, leaderboardOverlay].forEach(el => {
+    [nameOverlay, leaderboardOverlay, adGameOverContainer].forEach(el => {
         el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: false });
         el.addEventListener("mousedown", (e) => e.stopPropagation());
     });
@@ -411,7 +469,7 @@
     });
 
     /* ==========================================
-       AUDIO (EFECTOS DE SONIDO + MÚSICA)
+       AUDIO
        ========================================== */
     let audioCtx = null;
     let isMusicPlaying = false;
@@ -539,7 +597,7 @@
     }
 
     /* ==========================================
-       RANKINGS Y CONEXIÓN CON SERVIDOR
+       RANKINGS
        ========================================== */
     let currentTab = "sem";
 
@@ -628,7 +686,7 @@
     }
 
     /* ==========================================
-       MECÁNICA Y BUCLE DEL JUEGO
+       MECÁNICA DEL JUEGO
        ========================================== */
     let birdX = 70;
     let birdY = 200;
@@ -713,6 +771,9 @@
         lastPipeTop = null; 
         gameOver = false;
         gameStarted = true;
+        
+        adGameOverContainer.style.display = "none";
+        
         velocity = jump;
         playJumpSound();
         startBackgroundMusic();
@@ -798,6 +859,8 @@
             playGameOverSound();
             updateLocalRecords(score);
             sendScoreToBackend(score);
+
+            adGameOverContainer.style.display = "flex";
         }
     }
 
@@ -988,9 +1051,9 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.textAlign = "center";
-            drawOutlinedText("GAME OVER", canvas.width / 2, canvas.height / 2 - 25, "900 28px 'Arial Black', sans-serif", "#ff2a5f", "#000000", 6);
-            drawOutlinedText("Puntaje Final: " + score, canvas.width / 2, canvas.height / 2 + 15, "bold 18px 'Arial Black', sans-serif", "#ffffff", "#000000", 4);
-            drawOutlinedText("Toca para Reiniciar", canvas.width / 2, canvas.height / 2 + 45, "bold 14px 'Arial Black', sans-serif", "#ffee00", "#000000", 3);
+            drawOutlinedText("GAME OVER", canvas.width / 2, canvas.height / 2 - 120, "900 28px 'Arial Black', sans-serif", "#ff2a5f", "#000000", 6);
+            drawOutlinedText("Puntaje Final: " + score, canvas.width / 2, canvas.height / 2 - 80, "bold 18px 'Arial Black', sans-serif", "#ffffff", "#000000", 4);
+            drawOutlinedText("Toca para Reiniciar", canvas.width / 2, canvas.height / 2 + 130, "bold 14px 'Arial Black', sans-serif", "#ffee00", "#000000", 3);
             ctx.textAlign = "start";
         }
     }
