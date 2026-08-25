@@ -374,13 +374,6 @@
     document.addEventListener("webkitfullscreenchange", () => setTimeout(resizeCanvas, 100));
     resizeCanvas();
 
-    [nameOverlay, leaderboardOverlay, adsContainer].forEach(el => {
-        if (el) {
-            el.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
-            el.addEventListener("mousedown", (e) => e.stopPropagation());
-        }
-    });
-
     let playerName = localStorage.getItem("ph_player_name") || "";
 
     function checkPlayerName() {
@@ -402,7 +395,7 @@
         }
     }
 
-    btnSaveName.addEventListener("click", (e) => {
+    btnSaveName.addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         executeSaveName();
     });
@@ -414,7 +407,7 @@
         }
     });
 
-    btnPromptChange.addEventListener("click", (e) => {
+    btnPromptChange.addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         playMenuClickSound();
         closeLeaderboard();
@@ -422,13 +415,13 @@
         nameOverlay.style.display = "flex";
     });
 
-    btnOpenLb.addEventListener("click", (e) => {
+    btnOpenLb.addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         playMenuClickSound();
         openLeaderboard();
     });
 
-    btnCloseLb.addEventListener("click", (e) => {
+    btnCloseLb.addEventListener("pointerdown", (e) => {
         e.stopPropagation();
         playMenuClickSound();
         closeLeaderboard();
@@ -626,7 +619,7 @@
     }
 
     document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("pointerdown", (e) => {
             e.stopPropagation();
             playMenuClickSound();
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -711,15 +704,8 @@
     document.addEventListener("keydown", (e) => { 
         if (e.code === "Space") handleInput(e); 
     });
-    
-    window.addEventListener("touchstart", (e) => {
-        if (e.target.closest('#name-overlay') || e.target.closest('#leaderboard-overlay') || e.target.closest('#btn-open-lb') || e.target.closest('#ads-container')) {
-            return;
-        }
-        handleInput(e);
-    }, { passive: true });
 
-    window.addEventListener("mousedown", (e) => {
+    window.addEventListener("pointerdown", (e) => {
         if (e.target.closest('#name-overlay') || e.target.closest('#leaderboard-overlay') || e.target.closest('#btn-open-lb') || e.target.closest('#ads-container')) {
             return;
         }
