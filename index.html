@@ -62,24 +62,22 @@
             width: 320px;
             height: 50px;
             z-index: 30;
-            pointer-events: none !important; /* El área transparente deja pasar los toques al canvas */
+            pointer-events: none !important;
         }
 
-        /* Solo permite la interacción si se toca exactamente la inserción o iframe del anuncio real */
         #ads-container ins,
         #ads-container iframe {
             pointer-events: auto !important;
         }
 
-        /* --- BOTÓN RANKINGS --- */
-        #btn-open-lb {
+        /* --- BOTONES SUPERIORES --- */
+        .top-btn {
             position: absolute;
             top: calc(env(safe-area-inset-top, 0px) + 16px);
-            right: 16px;
             background: #ffee00;
             color: #000000;
             border: 2px solid #000000;
-            padding: 7px 14px;
+            padding: 7px 12px;
             font-size: 11px;
             font-weight: 900;
             cursor: pointer;
@@ -89,6 +87,8 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
             touch-action: manipulation;
         }
+        #btn-open-lb { right: 16px; }
+        #btn-open-legal { left: 16px; background: #38bdf8; color: #000; }
 
         /* --- MODAL INGRESO DE NOMBRE --- */
         #name-overlay {
@@ -292,6 +292,53 @@
             touch-action: manipulation;
         }
 
+        /* --- MODAL DE POLÍTICAS E INFORMACIÓN (Para AdSense) --- */
+        #legal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 8, 17, 0.96);
+            backdrop-filter: blur(6px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: calc(env(safe-area-inset-top, 0px) + 15px) 15px 15px 15px;
+            z-index: 60;
+            pointer-events: none;
+        }
+        #legal-overlay.active {
+            display: flex;
+            pointer-events: auto;
+        }
+        .legal-content-box {
+            width: 100%;
+            max-width: 360px;
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #0f172a;
+            border: 2px solid #334155;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif; /* Texto plano legible para políticas */
+            font-size: 12px;
+            line-height: 1.5;
+            color: #cbd5e1;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+        .legal-content-box h3 {
+            color: #ffee00;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            font-family: 'Arial Black', Arial, sans-serif;
+        }
+        .legal-content-box p {
+            margin-bottom: 10px;
+        }
+
         .copyright-tag {
             position: absolute;
             bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
@@ -310,7 +357,8 @@
 <body>
 
 <div id="game-container">
-    <button id="btn-open-lb">🏆 RANKINGS</button>
+    <button id="btn-open-legal" class="top-btn">ℹ️ INFO & LEGAL</button>
+    <button id="btn-open-lb" class="top-btn">🏆 RANKINGS</button>
     <canvas id="gameCanvas"></canvas>
 
     <!-- BLOQUE DE ANUNCIOS ADSENSE -->
@@ -327,6 +375,7 @@
 
     <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
+    <!-- MODAL INGRESO DE NOMBRE -->
     <div id="name-overlay">
         <div class="name-box">
             <img src="IMG_7552.jpeg?v=2" alt="Logo Pixel-Hop" class="game-logo">
@@ -336,6 +385,7 @@
         </div>
     </div>
 
+    <!-- MODAL DE RANKINGS -->
     <div id="leaderboard-overlay">
         <div class="lb-title">Tabla de Récords</div>
         <div class="player-info-tag">
@@ -352,6 +402,25 @@
         <div class="lb-list" id="lb-content"></div>
         <button class="close-btn" id="btn-close-lb">VOLVER AL JUEGO</button>
     </div>
+
+    <!-- MODAL DE INFORMACIÓN Y POLÍTICAS (EXIGENCIA ADSENSE) -->
+    <div id="legal-overlay">
+        <div class="lb-title">Información y Políticas</div>
+        <div class="legal-content-box">
+            <h3>Acerca del Juego e Instrucciones</h3>
+            <p><strong>Pixel-Hop</strong> es un juego interactivo de habilidad en formato web (HTML5/Canvas), diseñado para ofrecer una experiencia rápida y entretenida desde cualquier dispositivo móvil o computadora.</p>
+            <p><strong>Cómo Jugar:</strong> Toca la pantalla o presiona la barra espaciadora para hacer saltar al personaje, esquivar los obstáculos (tubos) y acumular la mayor cantidad de puntos posibles. El sistema incluye un ranking en la nube para competir con jugadores.</p>
+
+            <h3>Política de Privacidad</h3>
+            <p>En Pixel-Hop, accesible desde pixel-hop.ar, una de nuestras principales prioridades es la privacidad de nuestros visitantes. Este documento contiene tipos de información que es recopilada y cómo la utilizamos.</p>
+            <p><strong>Uso de Publicidad de Terceros:</strong> Utilizamos proveedores externos, incluido Google AdSense, para publicar anuncios cuando visitas nuestro sitio web. Google utiliza cookies (como la cookie de DoubleClick) para mostrar anuncios basados en las visitas anteriores a este u otros sitios web. Los usuarios pueden inhabilitar el uso de publicidad personalizada visitando la Configuración de anuncios de Google.</p>
+            <p>Al utilizar nuestro sitio web, aceptas nuestra Política de Privacidad y sus términos.</p>
+
+            <h3>Términos y Condiciones</h3>
+            <p>El acceso y uso de Pixel-Hop implica la aceptación de los presentes términos. El contenido visual, código fuente y elementos gráficos están protegidos por derechos de autor (© 2026 Agustin Meza). Queda prohibida su reproducción no autorizada con fines comerciales.</p>
+        </div>
+        <button class="close-btn" id="btn-close-legal">ENTENDIDO</button>
+    </div>
 </div>
 
 <script>
@@ -362,11 +431,14 @@
 
     const nameOverlay = document.getElementById("name-overlay");
     const leaderboardOverlay = document.getElementById("leaderboard-overlay");
+    const legalOverlay = document.getElementById("legal-overlay");
     const btnSaveName = document.getElementById("btn-save-name");
     const nameInput = document.getElementById("player-name-input");
     const btnOpenLb = document.getElementById("btn-open-lb");
     const btnCloseLb = document.getElementById("btn-close-lb");
     const btnPromptChange = document.getElementById("btn-prompt-change");
+    const btnOpenLegal = document.getElementById("btn-open-legal");
+    const btnCloseLegal = document.getElementById("btn-close-legal");
 
     let topOffset = 60;
     let cachedSkyGrad = null;
@@ -441,6 +513,18 @@
         e.stopPropagation();
         playMenuClickSound();
         closeLeaderboard();
+    });
+
+    btnOpenLegal.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        playMenuClickSound();
+        legalOverlay.classList.add("active");
+    });
+
+    btnCloseLegal.addEventListener("pointerdown", (e) => {
+        e.stopPropagation();
+        playMenuClickSound();
+        legalOverlay.classList.remove("active");
     });
 
     let audioCtx = null;
@@ -693,7 +777,9 @@
     }
 
     function handleInput(e) {
-        if (nameOverlay.classList.contains("active") || leaderboardOverlay.classList.contains("active")) {
+        if (nameOverlay.classList.contains("active") || 
+            leaderboardOverlay.classList.contains("active") || 
+            legalOverlay.classList.contains("active")) {
             return;
         }
 
@@ -725,15 +811,17 @@
         if (e.code === "Space") handleInput(e); 
     });
 
-    /* --- LISTENER PROTEGIDO PARA ADSENSE Y BOTÓN TOCA ARRIBA/JUEGO --- */
+    /* --- LISTENER PROTEGIDO PARA ADSENSE Y JUEGO --- */
     window.addEventListener("pointerdown", (e) => {
         if (document.getElementById('name-overlay').classList.contains('active') || 
-            document.getElementById('leaderboard-overlay').classList.contains('active')) {
+            document.getElementById('leaderboard-overlay').classList.contains('active') ||
+            document.getElementById('legal-overlay').classList.contains('active')) {
             return;
         }
 
-        // Si el toque fue en elementos específicos de la interfaz o el banner publicitario real
+        // Si el toque fue en los botones superiores o el banner publicitario real
         if (e.target.closest('#btn-open-lb') || 
+            e.target.closest('#btn-open-legal') || 
             e.target.closest('iframe') || 
             e.target.closest('ins.adsbygoogle')) {
             return;
