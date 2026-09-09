@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Pixel-Hop</title>
+    <title>Pixel-Hop | Juego Arcade Online</title>
     
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5123032314263273"
@@ -31,8 +31,7 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            height: 100dvh;
-            overflow: hidden;
+            overflow-x: hidden;
             background-color: #050811;
             font-family: 'Arial Black', Arial, sans-serif;
             color: #fff;
@@ -40,11 +39,11 @@
             -webkit-user-select: none;
             touch-action: manipulation;
         }
-        #game-container {
+        #game-wrapper {
             position: relative;
             width: 100%;
-            height: 100%;
-            overflow: hidden;
+            height: 100dvh;
+            min-height: 550px;
         }
         canvas { 
             display: block; 
@@ -89,6 +88,40 @@
         }
         #btn-open-lb { right: 16px; }
         #btn-open-legal { right: 108px; background: #38bdf8; color: #000; }
+
+        /* --- SECCIÓN DE CONTENIDO EDITORIAL INDEXABLE (EXIGENCIA ADSENSE) --- */
+        .seo-content-section {
+            background: #0f172a;
+            border-top: 3px solid #38bdf8;
+            padding: 30px 20px;
+            color: #cbd5e1;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            z-index: 10;
+            position: relative;
+        }
+        .seo-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .seo-content-section h1, .seo-content-section h2 {
+            color: #ffee00;
+            font-family: 'Arial Black', Arial, sans-serif;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .seo-content-section p {
+            margin-bottom: 15px;
+        }
+        .seo-content-section ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .seo-content-section li {
+            margin-bottom: 5px;
+        }
 
         /* --- MODAL INGRESO DE NOMBRE --- */
         #name-overlay {
@@ -292,7 +325,7 @@
             touch-action: manipulation;
         }
 
-        /* --- MODAL DE POLÍTICAS E INFORMACIÓN (Para AdSense) --- */
+        /* --- MODAL DE POLÍTICAS E INFORMACIÓN --- */
         #legal-overlay {
             position: absolute;
             top: 0;
@@ -321,7 +354,7 @@
             border: 2px solid #334155;
             padding: 15px;
             border-radius: 8px;
-            font-family: Arial, sans-serif; /* Texto plano legible para políticas */
+            font-family: Arial, sans-serif;
             font-size: 12px;
             line-height: 1.5;
             color: #cbd5e1;
@@ -340,88 +373,107 @@
         }
 
         .copyright-tag {
-            position: absolute;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 2px);
-            width: 100%;
             text-align: center;
-            font-size: 9px;
+            font-size: 10px;
             font-weight: bold;
             color: rgba(255, 255, 255, 0.65);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
-            z-index: 15;
-            pointer-events: none;
+            padding: 20px 0;
+            background: #050811;
             letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
 
-<div id="game-container">
-    <button id="btn-open-legal" class="top-btn">ℹ️ INFO & LEGAL</button>
-    <button id="btn-open-lb" class="top-btn">🏆 RANKINGS</button>
-    <canvas id="gameCanvas"></canvas>
+<div id="game-wrapper">
+    <div id="game-container">
+        <button id="btn-open-legal" class="top-btn">ℹ️ INFO & LEGAL</button>
+        <button id="btn-open-lb" class="top-btn">🏆 RANKINGS</button>
+        <canvas id="gameCanvas"></canvas>
 
-    <!-- BLOQUE DE ANUNCIOS ADSENSE -->
-    <div id="ads-container">
-        <ins class="adsbygoogle"
-             style="display:inline-block;width:320px;height:50px"
-             data-ad-client="ca-pub-5123032314263273"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
-
-    <div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
-
-    <!-- MODAL INGRESO DE NOMBRE -->
-    <div id="name-overlay">
-        <div class="name-box">
-            <img src="IMG_7552.jpeg?v=2" alt="Logo Pixel-Hop" class="game-logo">
-            <div class="name-title">¡Ingresa tu Apodo!</div>
-            <input type="text" id="player-name-input" class="name-input" placeholder="Tu Nombre o Nick" maxlength="12" autocomplete="off">
-            <button class="start-btn" id="btn-save-name">GUARDAR Y JUGAR</button>
+        <!-- BLOQUE DE ANUNCIOS ADSENSE -->
+        <div id="ads-container">
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:320px;height:50px"
+                 data-ad-client="ca-pub-5123032314263273"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
-    </div>
 
-    <!-- MODAL DE RANKINGS -->
-    <div id="leaderboard-overlay">
-        <div class="lb-title">Tabla de Récords</div>
-        <div class="player-info-tag">
-            Jugador: <strong id="current-player-display" style="color:#fff;">-</strong>
-            <button class="change-name-btn" id="btn-prompt-change">[Cambiar]</button>
+        <!-- MODAL INGRESO DE NOMBRE -->
+        <div id="name-overlay">
+            <div class="name-box">
+                <img src="IMG_7552.jpeg?v=2" alt="Logo Pixel-Hop" class="game-logo">
+                <div class="name-title">¡Ingresa tu Apodo!</div>
+                <input type="text" id="player-name-input" class="name-input" placeholder="Tu Nombre o Nick" maxlength="12" autocomplete="off">
+                <button class="start-btn" id="btn-save-name">GUARDAR Y JUGAR</button>
+            </div>
         </div>
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="sem">Semanal</button>
-            <button class="tab-btn" data-tab="mes">Mensual</button>
-            <button class="tab-btn" data-tab="prov">Provincia</button>
-            <button class="tab-btn" data-tab="nac">Nacional</button>
-            <button class="tab-btn" data-tab="int">Global</button>
+
+        <!-- MODAL DE RANKINGS -->
+        <div id="leaderboard-overlay">
+            <div class="lb-title">Tabla de Récords</div>
+            <div class="player-info-tag">
+                Jugador: <strong id="current-player-display" style="color:#fff;">-</strong>
+                <button class="change-name-btn" id="btn-prompt-change">[Cambiar]</button>
+            </div>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="sem">Semanal</button>
+                <button class="tab-btn" data-tab="mes">Mensual</button>
+                <button class="tab-btn" data-tab="prov">Provincia</button>
+                <button class="tab-btn" data-tab="nac">Nacional</button>
+                <button class="tab-btn" data-tab="int">Global</button>
+            </div>
+            <div class="lb-list" id="lb-content"></div>
+            <button class="close-btn" id="btn-close-lb">VOLVER AL JUEGO</button>
         </div>
-        <div class="lb-list" id="lb-content"></div>
-        <button class="close-btn" id="btn-close-lb">VOLVER AL JUEGO</button>
-    </div>
 
-    <!-- MODAL DE INFORMACIÓN Y POLÍTICAS (EXIGENCIA ADSENSE) -->
-    <div id="legal-overlay">
-        <div class="lb-title">Información y Políticas</div>
-        <div class="legal-content-box">
-            <h3>Acerca del Juego e Instrucciones</h3>
-            <p><strong>Pixel-Hop</strong> es un juego interactivo de habilidad en formato web (HTML5/Canvas), diseñado para ofrecer una experiencia rápida y entretenida desde cualquier dispositivo móvil o computadora.</p>
-            <p><strong>Cómo Jugar:</strong> Toca la pantalla o presiona la barra espaciadora para hacer saltar al personaje, esquivar los obstáculos (tubos) y acumular la mayor cantidad de puntos posibles. El sistema incluye un ranking en la nube para competir con jugadores.</p>
-
-            <h3>Política de Privacidad</h3>
-            <p>En Pixel-Hop, accesible desde pixel-hop.ar, una de nuestras principales prioridades es la privacidad de nuestros visitantes. Este documento contiene tipos de información que es recopilada y cómo la utilizamos.</p>
-            <p><strong>Uso de Publicidad de Terceros:</strong> Utilizamos proveedores externos, incluido Google AdSense, para publicar anuncios cuando visitas nuestro sitio web. Google utiliza cookies (como la cookie de DoubleClick) para mostrar anuncios basados en las visitas anteriores a este u otros sitios web. Los usuarios pueden inhabilitar el uso de publicidad personalizada visitando la Configuración de anuncios de Google.</p>
-            <p>Al utilizar nuestro sitio web, aceptas nuestra Política de Privacidad y sus términos.</p>
-
-            <h3>Términos y Condiciones</h3>
-            <p>El acceso y uso de Pixel-Hop implica la aceptación de los presentes términos. El contenido visual, código fuente y elementos gráficos están protegidos por derechos de autor (© 2026 Agustin Meza). Queda prohibida su reproducción no autorizada con fines comerciales.</p>
+        <!-- MODAL DE INFORMACIÓN RÁPIDA Y POLÍTICAS -->
+        <div id="legal-overlay">
+            <div class="lb-title">Información y Políticas</div>
+            <div class="legal-content-box">
+                <h3>Acerca de Pixel-Hop</h3>
+                <p>Pixel-Hop es un juego de habilidad arcade ligero optimizado para navegadores web móviles y de escritorio.</p>
+                <h3>Política de Privacidad de Anuncios</h3>
+                <p>Utilizamos Google AdSense para mostrar anuncios personalizados. Puedes consultar más detalles en la sección inferior de nuestra página principal.</p>
+            </div>
+            <button class="close-btn" id="btn-close-legal">ENTENDIDO</button>
         </div>
-        <button class="close-btn" id="btn-close-legal">ENTENDIDO</button>
     </div>
 </div>
+
+<!-- SECCIÓN EDITORIAL INDEXABLE EXTERNA (Clave para superar el filtro de AdSense por "Contenido de poco valor") -->
+<section class="seo-content-section">
+    <div class="seo-container">
+        <h1>Pixel-Hop: El Juego Arcade Clásico de Habilidad Online</h1>
+        <p>Bienvenido a <strong>Pixel-Hop</strong>, una experiencia interactiva diseñada para poner a prueba tus reflejos, tu concentración y tu capacidad de superación constante. Este título combina mecánicas retro de salto con un diseño moderno, adaptado de forma responsiva para ofrecer un rendimiento fluido tanto en computadoras de escritorio como en smartphones y tablets.</p>
+        
+        <h2>¿Cómo Jugar a Pixel-Hop? Guía de Controles y Reglas</h2>
+        <p>El objetivo principal del juego es sumamente sencillo pero desafiante:</p>
+        <ul>
+            <li><strong>Controles táctiles o teclado:</strong> Haz clic en la pantalla, toca con tu dedo en dispositivos móviles o presiona la barra espaciadora en tu teclado para hacer que el personaje efectúe un salto controlado.</li>
+            <li><strong>Esquiva los obstáculos:</strong> Deberás calcular el momento exacto de cada impulso para evitar chocar contra los tubos que aparecen de forma constante en el escenario.</li>
+            <li><strong>Acumula puntos:</strong> Cada obstáculo superado con éxito incrementará tu marcador global. ¡Compite contra ti mismo para romper tus propios récords semanales y mensuales!</li>
+        </ul>
+
+        <h2>Características Principales del Proyecto</h2>
+        <p>Pixel-Hop no es solo un pasatiempo casual, sino una plataforma comunitaria interactiva que incorpora:</p>
+        <ul>
+            <li><strong>Sistema de Clasificación en la Nube:</strong> Guarda tus marcas personales y compite en tablas de récords organizadas por períodos (semanal, mensual, provincial, nacional e internacional).</li>
+            <li><strong>Optimización Web App (PWA):</strong> Puedes guardar el acceso directo directamente en la pantalla de inicio de tu dispositivo iOS o Android para jugarlo como si fuera una aplicación nativa.</li>
+            <li><strong>Diseño Dinámico:</strong> Cambios estéticos de entorno a medida que superas tus marcas en partida.</li>
+        </ul>
+
+        <h2>Política de Privacidad y Transparencia</h2>
+        <p>En cumplimiento con las normativas de la industria digital, informamos que <strong>Pixel-Hop</strong> utiliza servicios de publicidad de terceros, específicamente <strong>Google AdSense</strong>, para gestionar la inserción de anuncios comerciales orientados a mantener la gratuidad de la plataforma. Google utiliza cookies técnicas para la correcta visualización y medición de impresiones publicitarias. Los usuarios tienen total libertad de configurar la personalización publicitaria desde los paneles oficiales de su cuenta de Google.</p>
+        <p>Todos los derechos de propiedad intelectual, código fuente, logotipos y recursos gráficos pertenecen legítimamente a sus creadores (© 2026). Queda prohibida la copia o redistribución comercial no autorizada.</p>
+    </div>
+</section>
+
+<div class="copyright-tag">© 2026 Agustin Meza. Todos los derechos reservados.</div>
 
 <script>
     const API_URL = "https://proyecto-y42g.onrender.com";
@@ -811,7 +863,6 @@
         if (e.code === "Space") handleInput(e); 
     });
 
-    /* --- LISTENER PROTEGIDO PARA ADSENSE Y JUEGO --- */
     window.addEventListener("pointerdown", (e) => {
         if (document.getElementById('name-overlay').classList.contains('active') || 
             document.getElementById('leaderboard-overlay').classList.contains('active') ||
@@ -819,7 +870,6 @@
             return;
         }
 
-        // Si el toque fue en los botones superiores o el banner publicitario real
         if (e.target.closest('#btn-open-lb') || 
             e.target.closest('#btn-open-legal') || 
             e.target.closest('iframe') || 
