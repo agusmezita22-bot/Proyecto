@@ -89,7 +89,7 @@
         #btn-open-lb { right: 16px; }
         #btn-open-legal { right: 108px; background: #38bdf8; color: #000; }
 
-        /* --- SECCIÓN DE CONTENIDO EDITORIAL INDEXABLE (EXIGENCIA ADSENSE) --- */
+        /* --- SECCIÓN DE CONTENIDO INDEXABLE --- */
         .seo-content-section {
             background: #0f172a;
             border-top: 3px solid #38bdf8;
@@ -445,31 +445,11 @@
     </div>
 </div>
 
-<!-- SECCIÓN EDITORIAL INDEXABLE EXTERNA (Clave para superar el filtro de AdSense por "Contenido de poco valor") -->
+<!-- SECCIÓN EDITORIAL INDEXABLE EXTERNA -->
 <section class="seo-content-section">
     <div class="seo-container">
         <h1>Pixel-Hop: El Juego Arcade Clásico de Habilidad Online</h1>
-        <p>Bienvenido a <strong>Pixel-Hop</strong>, una experiencia interactiva diseñada para poner a prueba tus reflejos, tu concentración y tu capacidad de superación constante. Este título combina mecánicas retro de salto con un diseño moderno, adaptado de forma responsiva para ofrecer un rendimiento fluido tanto en computadoras de escritorio como en smartphones y tablets.</p>
-        
-        <h2>¿Cómo Jugar a Pixel-Hop? Guía de Controles y Reglas</h2>
-        <p>El objetivo principal del juego es sumamente sencillo pero desafiante:</p>
-        <ul>
-            <li><strong>Controles táctiles o teclado:</strong> Haz clic en la pantalla, toca con tu dedo en dispositivos móviles o presiona la barra espaciadora en tu teclado para hacer que el personaje efectúe un salto controlado.</li>
-            <li><strong>Esquiva los obstáculos:</strong> Deberás calcular el momento exacto de cada impulso para evitar chocar contra los tubos que aparecen de forma constante en el escenario.</li>
-            <li><strong>Acumula puntos:</strong> Cada obstáculo superado con éxito incrementará tu marcador global. ¡Compite contra ti mismo para romper tus propios récords semanales y mensuales!</li>
-        </ul>
-
-        <h2>Características Principales del Proyecto</h2>
-        <p>Pixel-Hop no es solo un pasatiempo casual, sino una plataforma comunitaria interactiva que incorpora:</p>
-        <ul>
-            <li><strong>Sistema de Clasificación en la Nube:</strong> Guarda tus marcas personales y compite en tablas de récords organizadas por períodos (semanal, mensual, provincial, nacional e internacional).</li>
-            <li><strong>Optimización Web App (PWA):</strong> Puedes guardar el acceso directo directamente en la pantalla de inicio de tu dispositivo iOS o Android para jugarlo como si fuera una aplicación nativa.</li>
-            <li><strong>Diseño Dinámico:</strong> Cambios estéticos de entorno a medida que superas tus marcas en partida.</li>
-        </ul>
-
-        <h2>Política de Privacidad y Transparencia</h2>
-        <p>En cumplimiento con las normativas de la industria digital, informamos que <strong>Pixel-Hop</strong> utiliza servicios de publicidad de terceros, específicamente <strong>Google AdSense</strong>, para gestionar la inserción de anuncios comerciales orientados a mantener la gratuidad de la plataforma. Google utiliza cookies técnicas para la correcta visualización y medición de impresiones publicitarias. Los usuarios tienen total libertad de configurar la personalización publicitaria desde los paneles oficiales de su cuenta de Google.</p>
-        <p>Todos los derechos de propiedad intelectual, código fuente, logotipos y recursos gráficos pertenecen legítimamente a sus creadores (© 2026). Queda prohibida la copia o redistribución comercial no autorizada.</p>
+        <p>Bienvenido a <strong>Pixel-Hop</strong>, una experiencia interactiva diseñada para poner a prueba tus reflejos, tu concentración y tu capacidad de superación constante.</p>
     </div>
 </section>
 
@@ -708,27 +688,19 @@
 
     async function sendScoreToBackend(newScore) {
         if (!playerName || newScore <= 0) return;
-
         try {
             await fetch(`${API_URL}/score`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: playerName,
-                    score: newScore
-                })
+                body: JSON.stringify({ name: playerName, score: newScore })
             });
-        } catch (err) {
-            console.warn("Servidor inaccesible. Guardado en almacenamiento local.", err);
-        }
+        } catch (err) {}
     }
 
     function updateLocalRecords(newScore) {
         if (!playerName) return;
-
         let currentSem = parseInt(localStorage.getItem("ph_score_sem") || "0");
         let currentMes = parseInt(localStorage.getItem("ph_score_mes") || "0");
-
         if (newScore > currentSem) localStorage.setItem("ph_score_sem", newScore);
         if (newScore > currentMes) localStorage.setItem("ph_score_mes", newScore);
     }
@@ -736,10 +708,9 @@
     async function fetchLeaderboard() {
         try {
             const response = await fetch(`${API_URL}/leaderboard?tab=${currentTab}`);
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            if (!response.ok) throw new Error();
             return await response.json();
         } catch (error) {
-            console.error("Error al cargar ranking global:", error);
             return null;
         }
     }
@@ -747,16 +718,12 @@
     async function renderLeaderboard() {
         const content = document.getElementById("lb-content");
         content.innerHTML = `<div class="lb-status-msg">Cargando rankings de la nube...</div>`;
-
         let list = await fetchLeaderboard();
-
         content.innerHTML = "";
-
         if (!list || list.length === 0) {
             content.innerHTML = `<div class="lb-status-msg">No hay récords registrados aún en este servidor.</div>`;
             return;
         }
-
         list.forEach((item, index) => {
             const row = document.createElement("div");
             let isMe = item.name.toLowerCase() === playerName.toLowerCase();
@@ -793,18 +760,18 @@
     let birdX = 70;
     let birdY = 200;
     let birdRadius = 12;
-    let birdHitboxRadius = 10;
+    let birdHitboxRadius = 9; // Ajustado para mayor precisión sin frustrar al jugador
     
-    let gravity = 0.55; 
+    let gravity = 0.50; 
     let velocity = 0;
-    let jump = -7.0; 
+    let jump = -6.8; 
     let wingAngle = 0;
 
     let pipes = [];
-    let pipeWidth = 52;
-    let pipeGap = 88; 
-    let pipeInterval = 78; 
-    let pipeSpeed = 2.6; 
+    let pipeWidth = 56;
+    let pipeGap = 130;  // ⬅️ CAMBIO CLAVE: Espacio vertical más amplio y cómodo para jugar
+    let pipeInterval = 85; 
+    let pipeSpeed = 2.4; 
     let frameCount = 0;
     let lastPipeTop = null; 
 
@@ -903,21 +870,23 @@
         birdY += velocity;
         wingAngle += (0 - wingAngle) * 0.12;
 
+        // Limitar colisión con el suelo (dejando los 25px del piso) y el techo
         if (birdY + birdHitboxRadius > canvas.height - 25 || birdY - birdHitboxRadius < 0) {
             triggerGameOver();
         }
 
         frameCount++;
         if (frameCount % pipeInterval === 0) {
-            let minHeight = 50;
-            let maxHeight = canvas.height - pipeGap - minHeight - 30;
+            // ⬅️ CAMBIO CLAVE: Márgenes seguros para que los tubos nunca salgan fuera de la pantalla
+            let minHeight = 70;
+            let maxHeight = canvas.height - pipeGap - minHeight - 40;
 
             let topHeight;
 
             if (lastPipeTop === null) {
                 topHeight = Math.floor(Math.random() * (maxHeight - minHeight + 1)) + minHeight;
             } else {
-                let maxDelta = 160; 
+                let maxDelta = 110; 
                 let minTop = Math.max(minHeight, lastPipeTop - maxDelta);
                 let maxTop = Math.min(maxHeight, lastPipeTop + maxDelta);
 
@@ -1029,13 +998,6 @@
         ctx.beginPath();
         ctx.arc(astroX, astroY, 25, 0, Math.PI * 2);
         ctx.fill();
-
-        ctx.fillStyle = isDay ? "rgba(255, 255, 255, 0.5)" : "rgba(255, 255, 255, 0.05)";
-        ctx.beginPath();
-        ctx.arc(80, topOffset + 60, 30, 0, Math.PI * 2);
-        ctx.arc(110, topOffset + 50, 40, 0, Math.PI * 2);
-        ctx.arc(140, topOffset + 60, 30, 0, Math.PI * 2);
-        ctx.fill();
     }
 
     function drawPipes() {
@@ -1075,15 +1037,6 @@
         let angle = Math.min(Math.max(velocity * 0.14, -0.6), 1.2);
         ctx.rotate(angle);
 
-        ctx.save();
-        ctx.translate(-2, -2);
-        ctx.rotate(wingAngle - 0.2);
-        ctx.fillStyle = "#0284c7";
-        ctx.beginPath();
-        ctx.ellipse(-4, 0, 9, 4, Math.PI / 4, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
         let birdGrad = ctx.createRadialGradient(-3, -3, 2, 0, 0, birdRadius);
         birdGrad.addColorStop(0, "#67e8f9");
         birdGrad.addColorStop(0.7, "#0284c7");
@@ -1094,18 +1047,7 @@
         ctx.arc(0, 0, birdRadius, 0, Math.PI * 2);
         ctx.fill();
 
-        ctx.save();
-        ctx.translate(-3, 1);
-        ctx.rotate(-wingAngle + 0.1);
-        let wingGrad = ctx.createLinearGradient(-8, 0, 2, 8);
-        wingGrad.addColorStop(0, "#ffffff");
-        wingGrad.addColorStop(1, "#38bdf8");
-        ctx.fillStyle = wingGrad;
-        ctx.beginPath();
-        ctx.ellipse(-2, 3, 10, 5, Math.PI / 3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
+        // Ojo
         ctx.fillStyle = "#ffffff";
         ctx.beginPath();
         ctx.arc(4, -3, 4.5, 0, Math.PI * 2);
@@ -1116,6 +1058,7 @@
         ctx.arc(5, -3, 2, 0, Math.PI * 2);
         ctx.fill();
 
+        // Pico
         ctx.fillStyle = "#fbbf24";
         ctx.beginPath();
         ctx.moveTo(7, 1);
@@ -1129,10 +1072,8 @@
 
     function drawGround() {
         let isDay = score >= 10;
-
         ctx.fillStyle = cachedGroundGrad;
         ctx.fillRect(0, canvas.height - 25, canvas.width, 25);
-
         ctx.fillStyle = isDay ? "#fde047" : "#38bdf8";
         ctx.fillRect(0, canvas.height - 25, canvas.width, 3);
     }
@@ -1149,7 +1090,6 @@
 
     function drawUI() {
         let scoreColor = scoreFlashTimer > 0 ? "#00ff66" : "#ffee00";
-        
         drawOutlinedText("SCORE: " + score, 16, topOffset, "900 22px 'Arial Black', sans-serif", scoreColor);
 
         let bestSem = localStorage.getItem("ph_score_sem") || 0;
